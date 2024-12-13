@@ -287,6 +287,7 @@ app.get(
 );
 
 // Admin Routes
+// Admin Registration API
 app.post("/api/admin/register", async (req, res) => {
   try {
     const { username, email, phone, password, branch } = req.body;
@@ -308,9 +309,28 @@ app.post("/api/admin/register", async (req, res) => {
 
     await User.register(admin, password);
 
+    // Generate JWT Token
+    const payload = {
+      userId: admin._id,
+      username: admin.username,
+      email: admin.email,
+      role: admin.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
     res.status(201).json({
       success: true,
       message: "Admin registration successful!",
+      token, // Send the token
+      admin: {
+        username: admin.username,
+        email: admin.email,
+        role: admin.role,
+        branch: admin.branch,
+      },
     });
   } catch (err) {
     console.error("Admin registration error:", err);
@@ -321,6 +341,7 @@ app.post("/api/admin/register", async (req, res) => {
   }
 });
 
+// Admin Login API
 app.post("/api/admin/login", (req, res, next) => {
   passport.authenticate("user-local", (err, user, info) => {
     if (err) {
@@ -342,9 +363,21 @@ app.post("/api/admin/login", (req, res, next) => {
           message: "Login failed",
         });
       }
+
+      // Generate JWT token
+      const payload = {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
       res.json({
         success: true,
         message: "Admin login successful!",
+        token, // Send the token
         admin: {
           username: user.username,
           email: user.email,
@@ -355,6 +388,7 @@ app.post("/api/admin/login", (req, res, next) => {
     });
   })(req, res, next);
 });
+
 
 // Notice Routes (Admin)
 app.post("/api/admin/post", verifyToken, isAdmin, async (req, res) => {
