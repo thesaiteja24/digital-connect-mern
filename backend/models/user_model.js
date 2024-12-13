@@ -1,25 +1,14 @@
 const mongoose = require("mongoose");
-const { Schema, model } = mongoose;
+const passportLocalMongoose = require("passport-local-mongoose");
 
-const userSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  phone: {
-    type: Number,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  token: {
-    type: String,
-  },
+const userSchema = new mongoose.Schema({
+  username: { type: String, unique: true, required: true },
+  email: { type: String, unique: true, required: true },
+  phone: { type: Number, required: true },
+  password: { type: String }, // Will be hashed by Passport
 });
 
-const Student = model("User", userSchema);
+// Add passport-local-mongoose plugin
+userSchema.plugin(passportLocalMongoose, { usernameField: "username" });
+
+module.exports = mongoose.model("User", userSchema);
