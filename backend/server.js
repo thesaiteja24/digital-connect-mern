@@ -11,6 +11,7 @@ const passport = require("passport");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const LocalStrategy = require("passport-local").Strategy;
+const jwt = require("jsonwebtoken");
 
 // Models
 const User = require("./models/user_model");
@@ -110,6 +111,26 @@ const isFaculty = (req, res, next) => {
   });
 };
 
+// Middleware to verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.header("Authorization")?.split(" ")[1]; // Bearer token
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Token required" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Attach decoded user to request object
+    next();
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+};
+
 // Authentication Routes
 app.post("/api/register", async (req, res) => {
   try {
@@ -130,9 +151,22 @@ app.post("/api/register", async (req, res) => {
     const user = new User({ username, email, phone, role, branch });
     await User.register(user, password);
 
+    // Generate JWT token
+    const payload = {
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    }); // Token expires in 1 hour
+
     res.status(201).json({
       success: true,
       message: "Registration successful!",
+      token, // Send the token in the response
     });
   } catch (err) {
     console.error("Registration error:", err);
@@ -164,6 +198,19 @@ app.post("/api/login", (req, res, next) => {
           message: "Login failed",
         });
       }
+
+      // Create JWT token
+      const payload = {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      }); // Token expires in 1 hour
+
       const welcomeMessage =
         user.role === "student"
           ? "Welcome student! Access granted to student portal."
@@ -181,92 +228,65 @@ app.post("/api/login", (req, res, next) => {
           role: user.role,
           branch: user.branch,
         },
+        token, // Send the token in the response
       });
     });
   })(req, res, next);
 });
 
 // Student Routes
-app.get("/api/student/:branch/notices", isStudent, async (req, res) => {
-  try {
-    const { branch } = req.params;
-    const notices = await Notice.find({
-      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-    }).populate("createdBy", "username email");
+app.get(
+  "/api/student/:branch/notices",
+  verifyToken,
+  isStudent,
+  async (req, res) => {
+    try {
+      const { branch } = req.params;
+      const notices = await Notice.find({
+        $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
+      }).populate("createdBy", "username email");
 
-    res.json({
-      success: true,
-      notices,
-    });
-  } catch (err) {
-    console.error("Error fetching student notices:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch notices.",
-    });
+      res.json({
+        success: true,
+        notices,
+      });
+    } catch (err) {
+      console.error("Error fetching student notices:", err);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch notices.",
+      });
+    }
   }
-});
+);
 
 // Faculty Routes
-app.get("/api/faculty/:branch/notices", isFaculty, async (req, res) => {
-  try {
-    const { branch } = req.params;
-    const notices = await Notice.find({
-      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-    }).populate("createdBy", "username email");
+app.get(
+  "/api/faculty/:branch/notices",
+  verifyToken,
+  isFaculty,
+  async (req, res) => {
+    try {
+      const { branch } = req.params;
+      const notices = await Notice.find({
+        $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
+      }).populate("createdBy", "username email");
 
-    res.json({
-      success: true,
-      notices,
-    });
-  } catch (err) {
-    console.error("Error fetching faculty notices:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch notices.",
-    });
-  }
-});
-
-// Notice Routes
-// Public Routes
-app.get("/api/notices", async (req, res) => {
-  try {
-    const notices = await Notice.find({
-      category: "all",
-      branch: "all",
-    }).populate("createdBy", "username email");
-    res.json({ success: true, notices });
-  } catch (err) {
-    console.error("Error fetching notices:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch notices." });
-  }
-});
-
-app.get("/api/notices/:id", async (req, res) => {
-  try {
-    const notice = await Notice.findById(req.params.id).populate(
-      "createdBy",
-      "username email"
-    );
-    if (!notice) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Notice not found." });
+      res.json({
+        success: true,
+        notices,
+      });
+    } catch (err) {
+      console.error("Error fetching faculty notices:", err);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch notices.",
+      });
     }
-    res.json({ success: true, notice });
-  } catch (err) {
-    console.error("Error fetching notice:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch notice." });
   }
-});
+);
 
 // Admin Routes
-// Admin Registration API
 app.post("/api/admin/register", async (req, res) => {
   try {
     const { username, email, phone, password, branch } = req.body;
@@ -301,7 +321,6 @@ app.post("/api/admin/register", async (req, res) => {
   }
 });
 
-// Admin Login API
 app.post("/api/admin/login", (req, res, next) => {
   passport.authenticate("user-local", (err, user, info) => {
     if (err) {
@@ -337,7 +356,8 @@ app.post("/api/admin/login", (req, res, next) => {
   })(req, res, next);
 });
 
-app.post("/api/admin/post", isAdmin, async (req, res) => {
+// Notice Routes (Admin)
+app.post("/api/admin/post", verifyToken, isAdmin, async (req, res) => {
   try {
     const { title, description, image, video, category, branch } = req.body;
     const createdBy = req.user._id;
@@ -366,106 +386,7 @@ app.post("/api/admin/post", isAdmin, async (req, res) => {
   }
 });
 
-app.put("/api/admin/post/:id", isAdmin, async (req, res) => {
-  try {
-    const { title, description, image, video, category, branch } = req.body;
-    const updatedNotice = await Notice.findByIdAndUpdate(
-      req.params.id,
-      {
-        title,
-        description,
-        image,
-        video,
-        category: category || "all",
-        branch: branch || "all",
-        updatedAt: Date.now(),
-      },
-      { new: true }
-    );
-
-    if (!updatedNotice) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Notice not found." });
-    }
-
-    res.json({
-      success: true,
-      message: "Notice updated successfully!",
-      notice: updatedNotice,
-    });
-  } catch (err) {
-    console.error("Error updating notice:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to update notice." });
-  }
-});
-
-app.delete("/api/admin/post/:id", isAdmin, async (req, res) => {
-  try {
-    const deletedNotice = await Notice.findByIdAndDelete(req.params.id);
-    if (!deletedNotice) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Notice not found." });
-    }
-    res.json({ success: true, message: "Notice deleted successfully!" });
-  } catch (err) {
-    console.error("Error deleting notice:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to delete notice." });
-  }
-});
-
-app.get("/api/admin/dashboard", isAdmin, (req, res) => {
-  res.json({
-    success: true,
-    message: "Welcome to the admin dashboard",
-    admin: {
-      username: req.user.username,
-      email: req.user.email,
-    },
-  });
-});
-
-// ------- Danger ---------
-// Clear all documents in the User collection
-app.delete("/api/clear/users", isAdmin, async (req, res) => {
-  try {
-    await User.deleteMany({});
-    res.json({
-      success: true,
-      message: "All users cleared successfully",
-    });
-  } catch (err) {
-    console.error("Error clearing users:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to clear users",
-    });
-  }
-});
-
-// Clear all documents in the Notice collection
-app.delete("/api/clear/notices", isAdmin, async (req, res) => {
-  try {
-    await Notice.deleteMany({});
-    res.json({
-      success: true,
-      message: "All notices cleared successfully",
-    });
-  } catch (err) {
-    console.error("Error clearing notices:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to clear notices",
-    });
-  }
-});
-
-// Server Startup
+// Start Server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
