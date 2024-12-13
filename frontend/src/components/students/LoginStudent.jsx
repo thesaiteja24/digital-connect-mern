@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from "react-router-dom";
+import Studentlr from "../../assets/Untitled design.png";
 
 export default function LoginStudent() {
 
@@ -80,9 +81,9 @@ export default function LoginStudent() {
           {/* Right Column */}
           <div className="flex items-center justify-center w-full md:w-1/2 order-1 md:order-2 mb-6 md:mb-0">
             <img
-              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp"
+              src={Studentlr}
               alt="Registration"
-              className="rounded-2xl w-full"
+              className="rounded-2xl w-full hidden sm:block"
             />
           </div>
         </div>
