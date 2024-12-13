@@ -1,15 +1,16 @@
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
-
+const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user_model");
+const Notice = require("./models/notice_model"); // Assuming this is saved as notice_model.js
+
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -62,210 +63,96 @@ mongoose
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.error("Failed to connect to DB:", err));
 
-// Routes
-
-// User Register route
-app.post("/api/register", async (req, res) => {
+// Routes for Admin Notices
+// Admin: Create a new notice
+app.post("/api/admin/post", async (req, res) => {
   try {
-    const { username, email, phone, password, role } = req.body;
+    const { title, description, image, video, category, branch } = req.body;
+    const createdBy = req.user._id; // Assume the user is authenticated
 
-    // Check for existing username and email
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: "Username already taken" });
-    }
+    const newNotice = new Notice({
+      title,
+      description,
+      image,
+      video,
+      category,
+      branch,
+      createdBy,
+    });
 
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-
-    // Create and register user
-    const user = new User({ username, email, phone, role });
-    await User.register(user, password);
-
+    await newNotice.save();
     res.status(201).json({
       success: true,
-      message: "Registration successful!",
+      message: "Notice created successfully!",
+      notice: newNotice,
     });
   } catch (err) {
-    console.error("Registration error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Registration failed: " + err.message,
-    });
+    console.error("Error creating notice:", err);
+    res.status(500).json({ success: false, message: "Failed to create notice." });
   }
 });
 
-// User Login route
-app.post("/api/login", (req, res, next) => {
-  passport.authenticate("user-local", (err, user, info) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Authentication error",
-      });
-    }
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: info?.message || "Invalid credentials",
-      });
-    }
-
-    req.login(user, (err) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Login failed",
-        });
-      }
-
-      const welcomeMessage =
-        user.role === "student"
-          ? "Welcome student! Access granted to student portal."
-          : user.role === "faculty"
-          ? "Welcome professor! Access granted to faculty dashboard."
-          : "Welcome admin! Access granted to admin dashboard.";
-
-      res.json({
-        success: true,
-        message: "Login successful!",
-        welcomeMessage,
-        user: {
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        },
-      });
-    });
-  })(req, res, next);
-});
-
-// Admin Login route (using same model but checking role)
-app.post("/api/admin/login", (req, res, next) => {
-  passport.authenticate("user-local", (err, user, info) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Authentication error",
-      });
-    }
-
-    if (!user || user.role !== "admin") {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid admin credentials",
-      });
-    }
-
-    req.login(user, (err) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Login failed",
-        });
-      }
-
-      res.json({
-        success: true,
-        message: "Admin login successful!",
-        admin: {
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        },
-      });
-    });
-  })(req, res, next);
-});
-
-// Admin Register route (using User model)
-app.post("/api/admin/register", async (req, res) => {
+// Admin: Update a notice by ID
+app.put("/api/admin/post/:id", async (req, res) => {
   try {
-    const { username, email, phone, password } = req.body;
+    const { title, description, image, video, category, branch } = req.body;
+    const updatedNotice = await Notice.findByIdAndUpdate(
+      req.params.id,
+      { title, description, image, video, category, branch, updatedAt: Date.now() },
+      { new: true }
+    );
 
-    // Check for existing username and email
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: "Username already taken" });
+    if (!updatedNotice) {
+      return res.status(404).json({ success: false, message: "Notice not found." });
     }
 
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-
-    // Create and register admin
-    const admin = new User({ username, email, phone, role: "admin" });
-    await User.register(admin, password);
-
-    res.status(201).json({
-      success: true,
-      message: "Admin registration successful!",
-    });
+    res.json({ success: true, message: "Notice updated successfully!", notice: updatedNotice });
   } catch (err) {
-    console.error("Admin Registration error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Admin registration failed: " + err.message,
-    });
+    console.error("Error updating notice:", err);
+    res.status(500).json({ success: false, message: "Failed to update notice." });
   }
 });
 
-// Logout route
-app.post("/api/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Logout failed",
-      });
+// Admin: Delete a notice by ID
+app.delete("/api/admin/post/:id", async (req, res) => {
+  try {
+    const deletedNotice = await Notice.findByIdAndDelete(req.params.id);
+
+    if (!deletedNotice) {
+      return res.status(404).json({ success: false, message: "Notice not found." });
     }
-    res.json({
-      success: true,
-      message: "Logout successful!",
-    });
-  });
-});
 
-// Check if user is authenticated
-app.get("/api/check-auth", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({
-      authenticated: true,
-      user: {
-        username: req.user.username,
-        email: req.user.email,
-        role: req.user.role,
-      },
-    });
-  } else {
-    res.json({ authenticated: false });
+    res.json({ success: true, message: "Notice deleted successfully!" });
+  } catch (err) {
+    console.error("Error deleting notice:", err);
+    res.status(500).json({ success: false, message: "Failed to delete notice." });
   }
 });
 
-// Example Admin-only route
-function isAdmin(req, res, next) {
-  if (req.isAuthenticated() && req.user.role === "admin") {
-    return next();
+// General Routes for Notices
+// Get all notices
+app.get("/api/notices", async (req, res) => {
+  try {
+    const notices = await Notice.find().populate("createdBy", "username email");
+    res.json({ success: true, notices });
+  } catch (err) {
+    console.error("Error fetching notices:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch notices." });
   }
-  return res.status(403).json({
-    success: false,
-    message: "Access denied. Admin only.",
-  });
-}
+});
 
-app.get("/api/admin/dashboard", isAdmin, (req, res) => {
-  res.json({
-    success: true,
-    message: "Welcome to the admin dashboard",
-    admin: {
-      username: req.user.username,
-      email: req.user.email,
-    },
-  });
+// Get a single notice by ID
+app.get("/api/notices/:id", async (req, res) => {
+  try {
+    const notice = await Notice.findById(req.params.id).populate("createdBy", "username email");
+    if (!notice) {
+      return res.status(404).json({ success: false, message: "Notice not found." });
+    }
+    res.json({ success: true, notice });
+  } catch (err) {
+    console.error("Error fetching notice:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch notice." });
+  }
 });
 
 // Start the server

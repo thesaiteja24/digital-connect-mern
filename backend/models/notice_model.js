@@ -49,9 +49,14 @@ const noticeSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ["all", "student", "faculty", "cse", "csm", "csd"],
+    enum: ["all", "student", "faculty"],
     required: true,
     default: "all",
+  },
+  branch: {
+    type: String,
+    enum: ["cse", "csm", "csd"],
+    required: true,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
