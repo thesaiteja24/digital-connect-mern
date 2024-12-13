@@ -1,6 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import NoticeBoardImage from "./assets/Leonardo_Phoenix_A_modern_digital_notice_board_set_against_a_c_2.jpg";
+import StudentAvatar from "./assets/DALL·E 2024-12-13 21.58.59 - A cartoon-style avatar of a 20-year-old engineering student, resembling a.png";
+import FacultyAvatar from "./assets/Untitled design (1).png";
+import AdminAvatar from "./assets/Untitled design (2).png";
+
 
 export default function LandingPage() {
   return (
@@ -58,17 +62,17 @@ export default function LandingPage() {
             {
               title: "Student",
               description: "Access classes, assignments, and resources for your academic journey.",
-              img: "https://via.placeholder.com/300",
+              img:  StudentAvatar ,
             },
             {
               title: "Lecturer",
               description: "Manage courses, post materials, and communicate with students.",
-              img: "https://via.placeholder.com/300",
+              img: FacultyAvatar,
             },
             {
               title: "Admin",
               description: "Handle user accounts, announcements, and institutional data.",
-              img: "https://via.placeholder.com/300",
+              img: AdminAvatar,
             },
           ].map((card, index) => (
             <div
@@ -78,7 +82,7 @@ export default function LandingPage() {
               <img
                 src={card.img}
                 alt={card.title}
-                className="h-40 w-full object-cover rounded-md mb-4"
+                className="h-50 w-full object-cover rounded-md mb-4"
               />
               <h3 className="text-xl font-bold mb-2">{card.title}</h3>
               <p className="text-gray-600">{card.description}</p>

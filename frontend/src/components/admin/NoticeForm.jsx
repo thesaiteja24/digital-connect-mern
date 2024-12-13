@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 const NoticeForm = () => {
   const [title, setTitle] = useState("");
@@ -24,17 +23,23 @@ const NoticeForm = () => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("category", category);
-    formData.append("branch", branch);
+    formData.append("branch", branch.toUpperCase());
     if (image) formData.append("image", image);
     if (video) formData.append("video", video);
 
     try {
-      await axios.post("/api/notices", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const response = await fetch("http://localhost:8080/api/admin/post", {
+        method: "POST",
+        body: JSON.stringify(formData),
       });
-      alert("Notice added successfully!");
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Notice added successfully!");
+      } else {
+        alert(`Error: ${data.message || "Error adding notice"}`);
+      }
     } catch (error) {
       console.error("Error adding notice:", error);
       alert("Error adding notice!");

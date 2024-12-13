@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     enum: ["student", "faculty", "admin"],
     default: "student",
   },
-  branch: { type: String, required: true },
+  branch: { type: String },
 });
 
 userSchema.plugin(passportLocalMongoose, {

@@ -23,10 +23,13 @@ export default function LoginFaculty() {
       res = await res.json();
       let msg = res.message;
       console.log(msg);
-      if(msg == "Login successful!"){
-        navigate(`/faculty/dashboard/${msg}`);
+      if(msg == "Login successful!" && res.user.role == "faculty"){
+        navigate(`/faculty/dashboard/${msg}`,{ state: res });
       }
       setMessage(msg);
+      if(res.user.role != "faculty"){
+        setMessage("you are not a faculty");
+      }
     }
 
 

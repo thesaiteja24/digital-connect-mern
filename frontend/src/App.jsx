@@ -13,6 +13,9 @@ import StudentNotificationDetails from './components/students/StudentNotificatio
 import FacultyDashboard from "./components/faculty/FacultyDashboard.jsx";
 import FacultyNotificationDetails from "./components/faculty/FacultyNotificationDetails.jsx";
 
+import AdminDashboard from "./components/admin/AdminDashboard";
+import NoticeForm from "./components/admin/NoticeForm.jsx"; 
+
 import LandingPage from "./LandingPage.jsx";
 import LandingPageLogin from "./LandingPageLogin.jsx";
 import LandingPageRegister from './LandingPageRegister.jsx';
@@ -71,7 +74,14 @@ export default function App() {
       path : "/admin/login",
       element : <LoginAdmin />
     },
-    
+    {
+      path : "/admin/dashboard/:msg",
+      element : <AdminDashboard />
+    },
+    {
+      path : "/admin/dashboard/notice",
+      element : <NoticeForm />
+    }
   ])
 
   return (

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 export default function Login() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
+
+    const navigate = useNavigate();
 
     const handleLogin = async () =>{
       // console.log(email,password);
@@ -19,7 +22,15 @@ export default function Login() {
         }),
       });
       res = await res.json();
-      console.log(res.message);
+      let msg = res.message;
+      console.log(res);
+      if(msg == "Admin login successful!" && res.admin.role == "admin"){
+        navigate(`/admin/dashboard/${msg}`, { state: res });
+      }
+      setMessage(msg);
+      if(res.user.role != "student"){
+        setMessage("you are not a student");
+      }
     }
 
   return (

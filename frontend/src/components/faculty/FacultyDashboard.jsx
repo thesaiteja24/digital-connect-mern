@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
 
 const FacultyDashboard = () => {
   // Sample notifications data
@@ -32,6 +33,29 @@ const FacultyDashboard = () => {
 
   const { msg } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const notification = location.state || {}; // Get the notification object
+
+  const [flash, setFlash] = useState({
+    message: "",
+    type: "success",
+    show: false,
+  });
+
+  useEffect(() => {
+    if (msg) {
+      setFlash({ message: msg, type: "success", show: true });
+
+      // Hide the flash message after 3 seconds
+      setTimeout(() => {
+        setFlash((prev) => ({ ...prev, show: false }));
+      }, 3000);
+    }
+
+    if (notification.token) {
+      localStorage.setItem('token', notification.token);
+    }
+  }, [msg, notification]);
 
   // Mark a notification as read
   const markAsRead = (id) => {
@@ -40,6 +64,8 @@ const FacultyDashboard = () => {
         notification.id === id ? { ...notification, read: true } : notification
       )
     );
+    setFlash({ message: "Notification marked as read!", type: "success", show: true });
+    setTimeout(() => setFlash((prev) => ({ ...prev, show: false })), 3000); // Hide flash message after 3 seconds
   };
 
   // Redirect to Notification Details page
@@ -47,9 +73,42 @@ const FacultyDashboard = () => {
     navigate(`/faculty/dashboard/notification/${notification.id}`, { state: notification });
   };
 
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setFlash({ message: "Logged out successfully!", type: "success", show: true });
+    setTimeout(() => setFlash((prev) => ({ ...prev, show: false })), 3000); // Hide flash message after 3 seconds
+    navigate("/");
+  };
+
+  const FlashMessage = ({ message, type, show }) => {
+    if (!show) return null;
+
+    return (
+      <div
+        className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-md  border-2 border-black`}
+      >
+        {message}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Faculty Dashboard</h1>
+      {/* Flash Message */}
+      <FlashMessage message={flash.message} type={flash.type} show={flash.show} />
+      
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Faculty Dashboard</h1>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {notifications.map((notification) => (

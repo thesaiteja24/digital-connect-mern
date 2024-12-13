@@ -1,7 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+
+const FlashMessage = ({ message, type, show }) => {
+  if (!show) return null;
+
+  return (
+    <div
+      className={`fixed top-4 right-4 z-50 p-4 rounded shadow-md text-white ${
+        type === "success" ? "bg-green-500" : "bg-red-500"
+      }`}
+    >
+      {message}
+    </div>
+  );
+};
 
 const StudentDashboard = () => {
+  const [flash, setFlash] = useState({
+    message: "",
+    type: "success",
+    show: false,
+  });
+
+  const { msg } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const notification = location.state || {};
+
   // Sample notifications data
   const [notifications, setNotifications] = useState([
     {
@@ -9,7 +35,8 @@ const StudentDashboard = () => {
       title: "Exam Schedule Released",
       message: "Check the exam timetable on the portal.",
       image: "https://via.placeholder.com/150",
-      details: "The exam schedule for all courses has been updated. Visit the Exams section for more details.",
+      details:
+        "The exam schedule for all courses has been updated. Visit the Exams section for more details.",
       read: false,
     },
     {
@@ -25,15 +52,27 @@ const StudentDashboard = () => {
       title: "Workshop on AI",
       message: "Join the workshop on AI at 3 PM on Friday.",
       image: "https://via.placeholder.com/150",
-      details: "The AI workshop will cover recent advancements in machine learning. Venue: Room 305, CS Building.",
+      details:
+        "The AI workshop will cover recent advancements in machine learning. Venue: Room 305, CS Building.",
       read: false,
     },
   ]);
 
-  const { msg } = useParams();
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (msg) {
+      setFlash({ message: msg, type: "success", show: true });
 
-  // Mark a notification as read
+      // Hide the flash message after 3 seconds
+      setTimeout(() => {
+        setFlash((prev) => ({ ...prev, show: false }));
+      }, 3000);
+    }
+
+    if (notification.token) {
+      localStorage.setItem("token", notification.token);
+    }
+  }, [msg, notification]);
+
   const markAsRead = (id) => {
     setNotifications((prev) =>
       prev.map((notification) =>
@@ -42,14 +81,37 @@ const StudentDashboard = () => {
     );
   };
 
-  // Redirect to Notification Details page
   const viewNotification = (notification) => {
-    navigate(`student/dashboard/notification/${notification.id}`, { state: notification });
+    navigate(`student/dashboard/notification/${notification.id}`, {
+      state: notification,
+    });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Student Dashboard</h1>
+      {/* Flash Message */}
+      <FlashMessage
+        message={flash.message}
+        type={flash.type}
+        show={flash.show}
+      />
+
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Student Dashboard</h1>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {notifications.map((notification) => (

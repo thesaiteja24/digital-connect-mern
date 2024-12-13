@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function RegisterFaculty() {
 
@@ -8,6 +8,10 @@ export default function RegisterFaculty() {
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [selectedBranch, setSelectedBranch] = useState("");
+
+    const [message, setMessage] = useState("");
+
+    const navigate = useNavigate();
 
     const handleRegister = async () =>{
       // console.log(username,email,password);
@@ -25,7 +29,12 @@ export default function RegisterFaculty() {
         }),
       });
       res = await res.json();
-      console.log(res.message);
+      let msg = res.message;
+      console.log(res);
+      if(msg == "Admin registration successful!"){
+        navigate(`/admin/dashboard/${msg}`,{ state: res });
+      }
+      setMessage(msg);
     }
 
   const handleBranchChange = (event) => {

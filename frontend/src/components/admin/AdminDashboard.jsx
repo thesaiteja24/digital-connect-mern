@@ -1,9 +1,9 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const [analytics, setAnalytics] = useState({
     viewCount: 0,
     clickCount: 0,
@@ -25,26 +25,29 @@ const AdminDashboard = () => {
     fetchAnalytics();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const res = await fetch("/api/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const result = await res.json();
-      if (result.success) {
-        navigate("/login");
-      } else {
-        console.error("Logout failed", result.message);
-      }
-    } catch (error) {
-      console.error("Logout failed", error);
+  const { msg } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const notification = location.state || {};
+
+  useEffect(() => {
+    if (notification.token) {
+      localStorage.setItem('token', notification.token);  
     }
+  }, [notification]);
+
+  const handleLogout = async () => {
+    localStorage.removeItem('token');
+    navigate("/");
   };
 
   const handleSchedulePost = () => {
-    navigate("/schedule-post");
+    navigate("/admin/dashboard/notice");
   };
+
+  const handleNotice = () =>{
+    navigate("/admin/dashboard/notice");
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">

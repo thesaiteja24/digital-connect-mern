@@ -355,11 +355,44 @@ app.post("/api/admin/login", (req, res, next) => {
 });
 
 // Notice Routes
+// app.post("/api/admin/post", upload.single("imageOrVideo"), async (req, res) => {
+//   try {
+//     const { username, title, description, category, branch } = req.body;
+//     const imageOrVideoUrl = req.file ? req.file.path : null;
+//     const createdBy = await getUserIdByUsername(username);
+
+//     const newNotice = new Notice({
+//       title,
+//       description,
+//       category: category || "all",
+//       branch: branch || "all",
+//       createdBy,
+//       image: imageOrVideoUrl && req.file.mimetype.startsWith("image") ? imageOrVideoUrl : null,
+//       video: imageOrVideoUrl && req.file.mimetype.startsWith("video") ? imageOrVideoUrl : null,
+//     });
+
+//     await newNotice.save();
+//     await sendEmailNotification(newNotice);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Notice created successfully!",
+//       notice: newNotice,
+//     });
+//   } catch (err) {
+//     console.error("Error creating notice:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: `Failed to create notice. Error: ${err.message}`,
+//     });
+//   }
+// });
+
 app.post("/api/admin/post", upload.single("imageOrVideo"), async (req, res) => {
   try {
     const { username, title, description, category, branch } = req.body;
     const imageOrVideoUrl = req.file ? req.file.path : null;
-    const createdBy = await getUserIdByUsername(username);
+    const createdBy = username;
 
     const newNotice = new Notice({
       title,

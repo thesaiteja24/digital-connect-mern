@@ -1,153 +1,154 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import Studentlr from "../../assets/Untitled design.png";
-// import { Snackbar } from '@mui/material';
+import FlashMessage from '../FlashMessage';
 
 export default function RegisterStudent() {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState("");
+  const [flash, setFlash] = useState({
+    message: "",
+    type: "success",
+    show: false,
+  });
 
-    const [username, setUsername] = useState("");
+  const showFlashMessage = (message, type = "success", callback = null) => {
+    setFlash({ message, type, show: true });
 
-    const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
-    const [password, setPassword] = useState("");
-    const [selectedBranch, setSelectedBranch] = useState("");
-
-    const [message, setMessage] = useState("");
+    setTimeout(() => {
+      setFlash((prev) => ({ ...prev, show: false }));
+      if (callback) {
+        callback();
+      }
+    }, 3000);
+  };
 
   const handleBranchChange = (event) => {
     setSelectedBranch(event.target.value);
   };
 
-  const handleRegister = async () =>{
-    // console.log(username,email,password);
-    let res = await fetch('http://localhost:8080/api/register',{
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-      },
-     body:JSON.stringify({
-        'username': username,
-        'email': email,
-        'phone': phone,
-        'password': password,
-        'branch': selectedBranch,
-        "role" : "student", 
-      }),
-    });
-    res = await res.json();
-    let msg = res.message;
-    console.log(msg);
-    if(msg == "Registration successful!"){
-      navigate(`/student/dashboard/${msg}`);
+  const handleRegister = async () => {
+    try {
+      let res = await fetch('http://localhost:8080/api/register', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          phone,
+          password,
+          branch: selectedBranch,
+          role: "student",
+        }),
+      });
+      res = await res.json();
+      let msg = res.message;
+
+      if (msg === "Registration successful!") {
+        showFlashMessage(msg, "success", () => {
+          setMessage("");
+        });
+      } else {
+        showFlashMessage(msg, "error");
+      }
+    } catch (error) {
+      showFlashMessage("An error occurred while registering.", "error");
     }
-    setMessage(msg);
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      {/* Flash Message */}
+      {flash.show && (
+        <FlashMessage
+          message={flash.message}
+          type={flash.type}
+          show={flash.show}
+        />
+      )}
+
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-6 md:p-8">
         <div className="flex flex-col md:flex-row">
           {/* Left Column */}
           <div className="flex flex-col justify-center w-full md:w-1/2 order-2 md:order-1 px-6 md:px-12">
             <h1 className="text-center text-3xl font-bold mb-6">Register</h1>
 
-            {/* Common Class for Uniform Width */}
             <div className="space-y-6">
               {/* Name Input */}
-              <div>
-                {/* <label className="block text-lg font-semibold mb-2 text-black">
-                  Your Name
-                </label> */}
-                <input
-                  type="text"
-                  placeholder="Enter your name"
-                  className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                  onChange={ (e) => {setUsername(e.target.value)} }
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Enter your name"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                onChange={(e) => setUsername(e.target.value)}
+              />
 
               {/* Email Input */}
-              <div>
-                {/* <label className="block text-lg font-semibold mb-2 text-black">
-                  Your Email
-                </label> */}
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                  onChange={ (e) => {setEmail(e.target.value)} }
-                />
-              </div>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                onChange={(e) => setEmail(e.target.value)}
+              />
 
-              {/* Phone number Input */}
-              <div>
-                {/* <label className="block text-lg font-semibold mb-2 text-black">
-                  Repeat Password
-                </label> */}
-                <input
-                  type="password"
-                  placeholder="Phone number"
-                  className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                  onChange={ (e) => {setPhone(e.target.value)} }
-                />
-              </div>
+              {/* Phone Input */}
+              <input
+                type="text"
+                placeholder="Enter your phone number"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                onChange={(e) => setPhone(e.target.value)}
+              />
 
               {/* Password Input */}
-              <div>
-                {/* <label className="block text-lg font-semibold mb-2 text-black">
-                  Password
-                </label> */}
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                  onChange={ (e) => {setPassword(e.target.value)} }
-                />
-              </div>
-
-              
+              <input
+                type="password"
+                placeholder="Enter your password"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
               {/* Branch Dropdown */}
-              <div>
-                {/* <label htmlFor="branch" className="block text-lg font-semibold mb-2 text-black">
-                  Select Branch
-                </label> */}
-                <select
-                  id="branch"
-                  value={selectedBranch}
-                  onChange={handleBranchChange}
-                  className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                >
-                  <option value="" disabled>
-                    Select your branch
-                  </option>
-                  <option value="CSE">CSE</option>
-                  <option value="CSM">CSM</option>
-                  <option value="CSD">CSD</option>
-                </select>
-              </div>
+              <select
+                id="branch"
+                value={selectedBranch}
+                onChange={handleBranchChange}
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+              >
+                <option value="" disabled>
+                  Select your branch
+                </option>
+                <option value="CSE">CSE</option>
+                <option value="CSM">CSM</option>
+                <option value="CSD">CSD</option>
+              </select>
             </div>
 
             {/* Register Button */}
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full mt-6" onClick={handleRegister}>
+            <button
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full mt-6"
+              onClick={handleRegister}
+            >
               Register
             </button>
-            {/* onClick={() => navigate("/student/login")} */}
 
             {/* Login Link */}
-            <Link  
+            <Link
               className="mt-4 text-blue-500 hover:text-blue-600 text-center block"
               to="/student/login"
             >
-              Already have an account? Login 
+              Already have an account? Login
             </Link>
           </div>
 
           {/* Right Column */}
           <div className="flex items-center justify-center w-full md:w-1/2 order-1 md:order-2 mb-6 md:mb-0">
-          <img
+            <img
               src={Studentlr}
               alt="Registration"
               className="rounded-2xl w-full hidden sm:block"
