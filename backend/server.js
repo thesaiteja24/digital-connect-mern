@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== "production") {
-    require("dotenv").config();
+  require("dotenv").config();
 }
 
 const express = require("express");
@@ -7,6 +7,7 @@ const app = express();
 const port = process.env.PORT;
 const cors = require("cors");
 const mongoose = require("mongoose");
+const User = require("./models/user_model");
 
 // Database Connection
 const dbUrl = process.env.ATLAS_DB_URI;
@@ -15,9 +16,12 @@ mongoose
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.error("Failed to connect to DB:", err));
 
-
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+app.post("/register", (req, res) => {
+  res.send("Login");
 });
 
 app.listen(port, () => {
