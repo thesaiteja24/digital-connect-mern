@@ -21,6 +21,7 @@ export default function RegisterFaculty() {
           'email': email,
           'phone': phone,
           'password': password,
+          'branch' : selectedBranch,
           "role" : "faculty", 
         }),
       });

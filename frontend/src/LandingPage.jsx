@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import NoticeBoardImage from "./assets/Leonardo_Phoenix_A_modern_digital_notice_board_set_against_a_c_2.jpg";
 
 export default function LandingPage() {
   return (
@@ -7,7 +8,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="bg-blue-500 p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-white text-2xl font-bold">Campus Portal</h1>
+          <h1 className="text-white text-2xl font-bold">Digital Connect</h1>
           <div className="space-x-4">
             <Link
               to="/landinglogin"
@@ -28,13 +29,13 @@ export default function LandingPage() {
       {/* Section 1: Content and Image */}
       <div className="flex flex-col md:flex-row items-center justify-between p-8 bg-white">
         <div className="md:w-1/2 text-center md:text-left">
-          <h2 className="text-3xl font-bold mb-4">Welcome to the Campus Portal</h2>
+          <h2 className="text-3xl font-bold mb-4">Welcome to the Digital Connect</h2>
           <p className="text-gray-700 mb-4">
             Access everything you need, whether you're a student, lecturer, or
             admin. Stay connected, informed, and up-to-date.
           </p>
           <Link
-            to="/register"
+            to="/landingregister"
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Get Started
@@ -42,8 +43,8 @@ export default function LandingPage() {
         </div>
         <div className="md:w-1/2 mt-8 md:mt-0">
           <img
-            src="https://via.placeholder.com/500"
-            alt="Campus Life"
+            src={NoticeBoardImage}
+            alt="no image"
             className="rounded-lg shadow-md w-full"
           />
         </div>
