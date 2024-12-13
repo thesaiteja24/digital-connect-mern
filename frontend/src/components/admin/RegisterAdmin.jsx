@@ -94,27 +94,7 @@ export default function RegisterFaculty() {
                 />
               </div>
 
-              
-
-              {/* Branch Dropdown */}
-              <div>
-                {/* <label htmlFor="branch" className="block text-lg font-semibold mb-2 text-black">
-                  Select Branch
-                </label> */}
-                <select
-                  id="branch"
-                  value={selectedBranch}
-                  onChange={handleBranchChange}
-                  className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                >
-                  <option value="" disabled>
-                    Select your branch
-                  </option>
-                  <option value="CSE">CSE</option>
-                  <option value="CSM">CSM</option>
-                  <option value="CSD">CSD</option>
-                </select>
-              </div>
+            
             </div>
 
             {/* Register Button */}
@@ -124,7 +104,7 @@ export default function RegisterFaculty() {
 
             {/* Login Link */}
             <Link 
-              to="/login" 
+              to="/admin/login" 
               className="mt-4 text-blue-500 hover:text-blue-600 text-center block"
             >
               Already have an account? Login

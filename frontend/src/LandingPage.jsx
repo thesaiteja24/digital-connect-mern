@@ -10,13 +10,13 @@ export default function LandingPage() {
           <h1 className="text-white text-2xl font-bold">Campus Portal</h1>
           <div className="space-x-4">
             <Link
-              to="/login"
+              to="/landinglogin"
               className="text-white font-medium hover:text-blue-300"
             >
               Login
             </Link>
             <Link
-              to="/register"
+              to="/landingregister"
               className="text-white font-medium hover:text-blue-300"
             >
               Register

@@ -123,11 +123,11 @@ export default function RegisterStudent() {
             </button>
 
             {/* Login Link */}
-            <Link 
-              to="/login" 
+            <Link  
               className="mt-4 text-blue-500 hover:text-blue-600 text-center block"
+              to="/student/login"
             >
-              Already have an account? Login
+              Already have an account? Login 
             </Link>
           </div>
 

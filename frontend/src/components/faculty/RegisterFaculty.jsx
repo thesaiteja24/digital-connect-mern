@@ -124,7 +124,7 @@ export default function RegisterFaculty() {
 
             {/* Login Link */}
             <Link 
-              to="/login" 
+              to="/faculty/login" 
               className="mt-4 text-blue-500 hover:text-blue-600 text-center block"
             >
               Already have an account? Login

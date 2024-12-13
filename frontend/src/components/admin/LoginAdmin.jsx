@@ -70,7 +70,7 @@ export default function Login() {
 
             {/* Login Link */}
             <Link 
-              to="/login" 
+              to="/admin/register" 
               className="mt-4 text-blue-500 hover:text-blue-600 text-center block"
             >
               Don't have an account? Register
