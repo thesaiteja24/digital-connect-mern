@@ -1,5 +1,19 @@
+import { BrowserRouter } from "react-router-dom";
+import LandingPage from "./LandingPage.jsx";
+// import RegisterStudent from './components/students/RegisterStudent.jsx'
+// import LoginStudent from './components/students/LoginStudent.jsx'
+// import RegisterFaculty from './components/faculty/RegisterFaculty.jsx'
+// import LoginFaculty from './components/faculty/LoginFaculty.jsx'
+// import LoginAdmin from './components/admin/LoginAdmin.jsx'
+// import RegisterAdmin from './components/admin/RegisterAdmin.jsx'
+
+
 export default function App() {
   return (
-    <h1 className="text-3xl font-bold underline text-center">Hello world!</h1>
+    <BrowserRouter>
+      <LandingPage />
+      {/* <RegisterAdmin />
+      <LoginAdmin /> */}
+    </BrowserRouter>
   );
 }
