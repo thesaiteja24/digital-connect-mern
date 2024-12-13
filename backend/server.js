@@ -41,14 +41,15 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Passport Configuration
+// Passport Configuration for User Authentication
 passport.use(
+  "user-local",
   new LocalStrategy(
     {
       usernameField: "email",
       passwordField: "password",
     },
-    User.authenticate()
+    User.authenticate() // Use passport-local-mongoose method
   )
 );
 
@@ -63,7 +64,7 @@ mongoose
 
 // Routes
 
-// Register route
+// User Register route
 app.post("/api/register", async (req, res) => {
   try {
     const { username, email, phone, password, role } = req.body;
@@ -96,9 +97,9 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// Login route
+// User Login route
 app.post("/api/login", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
+  passport.authenticate("user-local", (err, user, info) => {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -124,7 +125,9 @@ app.post("/api/login", (req, res, next) => {
       const welcomeMessage =
         user.role === "student"
           ? "Welcome student! Access granted to student portal."
-          : "Welcome professor! Access granted to faculty dashboard.";
+          : user.role === "faculty"
+          ? "Welcome professor! Access granted to faculty dashboard."
+          : "Welcome admin! Access granted to admin dashboard.";
 
       res.json({
         success: true,
@@ -138,6 +141,77 @@ app.post("/api/login", (req, res, next) => {
       });
     });
   })(req, res, next);
+});
+
+// Admin Login route (using same model but checking role)
+app.post("/api/admin/login", (req, res, next) => {
+  passport.authenticate("user-local", (err, user, info) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Authentication error",
+      });
+    }
+
+    if (!user || user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid admin credentials",
+      });
+    }
+
+    req.login(user, (err) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Login failed",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Admin login successful!",
+        admin: {
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    });
+  })(req, res, next);
+});
+
+// Admin Register route (using User model)
+app.post("/api/admin/register", async (req, res) => {
+  try {
+    const { username, email, phone, password } = req.body;
+
+    // Check for existing username and email
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username already taken" });
+    }
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    // Create and register admin
+    const admin = new User({ username, email, phone, role: "admin" });
+    await User.register(admin, password);
+
+    res.status(201).json({
+      success: true,
+      message: "Admin registration successful!",
+    });
+  } catch (err) {
+    console.error("Admin Registration error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Admin registration failed: " + err.message,
+    });
+  }
 });
 
 // Logout route
@@ -170,6 +244,28 @@ app.get("/api/check-auth", (req, res) => {
   } else {
     res.json({ authenticated: false });
   }
+});
+
+// Example Admin-only route
+function isAdmin(req, res, next) {
+  if (req.isAuthenticated() && req.user.role === "admin") {
+    return next();
+  }
+  return res.status(403).json({
+    success: false,
+    message: "Access denied. Admin only.",
+  });
+}
+
+app.get("/api/admin/dashboard", isAdmin, (req, res) => {
+  res.json({
+    success: true,
+    message: "Welcome to the admin dashboard",
+    admin: {
+      username: req.user.username,
+      email: req.user.email,
+    },
+  });
 });
 
 // Start the server
