@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Studentlr from "../../assets/Untitled design.png";
 
 export default function LoginStudent() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
+
+    const navigate = useNavigate();
 
     const handleLogin = async () =>{
       // console.log(email,password);
@@ -20,7 +23,12 @@ export default function LoginStudent() {
         }),
       });
       res = await res.json();
-      console.log(res.message);
+      let msg = res.message;
+      console.log(msg);
+      if(msg == "Login successful!"){
+        navigate(`/student/dashboard/${msg}`);
+      }
+      setMessage(msg);
     }
 
   return (

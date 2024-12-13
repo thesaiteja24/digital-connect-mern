@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Studentlr from "../../assets/Untitled design.png";
+// import { Snackbar } from '@mui/material';
 
 export default function RegisterStudent() {
 
+    const navigate = useNavigate();
+
     const [username, setUsername] = useState("");
+
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [selectedBranch, setSelectedBranch] = useState("");
+
+    const [message, setMessage] = useState("");
 
   const handleBranchChange = (event) => {
     setSelectedBranch(event.target.value);
@@ -31,7 +37,12 @@ export default function RegisterStudent() {
       }),
     });
     res = await res.json();
-    console.log(res.message);
+    let msg = res.message;
+    console.log(msg);
+    if(msg == "Registration successful!"){
+      navigate(`/student/dashboard/${msg}`);
+    }
+    setMessage(msg);
   }
 
   return (
@@ -123,6 +134,7 @@ export default function RegisterStudent() {
             <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full mt-6" onClick={handleRegister}>
               Register
             </button>
+            {/* onClick={() => navigate("/student/login")} */}
 
             {/* Login Link */}
             <Link  

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function RegisterFaculty() {
+
+  const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
@@ -26,7 +28,12 @@ export default function RegisterFaculty() {
         }),
       });
       res = await res.json();
-      console.log(res.message);
+      let msg = res.message;
+    console.log(msg);
+    if(msg == "Registration successful!"){
+      navigate(`/faculty/dashboard/${msg}`);
+    }
+    setMessage(msg);
     }
 
   const handleBranchChange = (event) => {
