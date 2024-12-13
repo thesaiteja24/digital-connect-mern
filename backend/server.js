@@ -355,11 +355,10 @@ app.post("/api/admin/login", (req, res, next) => {
 });
 
 // Notice Routes
-app.post("/api/admin/post", upload.single("image"), async (req, res) => {
+app.post("/api/admin/post", upload.single("imageOrVideo"), async (req, res) => {
   try {
     const { username, title, description, category, branch } = req.body;
-
-    const imageUrl = req.file ? req.file.path : null;
+    const imageOrVideoUrl = req.file ? req.file.path : null;
     const createdBy = await getUserIdByUsername(username);
 
     const newNotice = new Notice({
@@ -368,7 +367,8 @@ app.post("/api/admin/post", upload.single("image"), async (req, res) => {
       category: category || "all",
       branch: branch || "all",
       createdBy,
-      image: imageUrl,
+      image: imageOrVideoUrl && req.file.mimetype.startsWith("image") ? imageOrVideoUrl : null,
+      video: imageOrVideoUrl && req.file.mimetype.startsWith("video") ? imageOrVideoUrl : null,
     });
 
     await newNotice.save();
@@ -387,6 +387,7 @@ app.post("/api/admin/post", upload.single("image"), async (req, res) => {
     });
   }
 });
+
 
 app.put("/api/admin/notice/:id", upload.single("image"), async (req, res) => {
   try {

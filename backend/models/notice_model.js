@@ -55,12 +55,13 @@ const noticeSchema = new mongoose.Schema({
   },
   branch: {
     type: String,
-    enum: ["CSE", "CSM", "CSD"],
+    enum: ["CSE", "CSM", "CSD"], // Add or modify branches as needed
     required: true,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Reference to the User model
+    required: true,
   },
   createdAt: {
     type: Date,
@@ -71,10 +72,6 @@ const noticeSchema = new mongoose.Schema({
   },
 });
 
-// Middleware to update the `updatedAt` field on save
-noticeSchema.pre("save", function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
+const Notice = mongoose.model("Notice", noticeSchema);
 
-module.exports = mongoose.model("Notice", noticeSchema);
+module.exports = Notice;
