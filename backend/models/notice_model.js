@@ -55,13 +55,12 @@ const noticeSchema = new mongoose.Schema({
   },
   branch: {
     type: String,
-    enum: ["cse", "csm", "csd"],
+    enum: ["CSE", "CSM", "CSD"],
     required: true,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Reference to the User model
-    required: true,
   },
   createdAt: {
     type: Date,

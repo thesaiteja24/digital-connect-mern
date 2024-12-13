@@ -12,6 +12,8 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const LocalStrategy = require("passport-local").Strategy;
 const jwt = require("jsonwebtoken");
+const getUserIdByUsername = require("./utils/getUserIdByUsername");
+const sendEmail = require("./mail");
 
 // Models
 const User = require("./models/user_model");
@@ -372,7 +374,9 @@ app.post("/api/admin/login", (req, res, next) => {
         role: user.role,
       };
 
-      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
 
       res.json({
         success: true,
@@ -389,24 +393,28 @@ app.post("/api/admin/login", (req, res, next) => {
   })(req, res, next);
 });
 
-
-// Notice Routes (Admin)
-app.post("/api/admin/post", verifyToken, isAdmin, async (req, res) => {
+// Admin Routes (Creating Notices)
+app.post("/api/admin/post", async (req, res) => {
   try {
-    const { title, description, image, video, category, branch } = req.body;
-    const createdBy = req.user._id;
+    const { username, title, description, category, branch } = req.body;
 
+    // Fetch the user ID based on username
+    const createdBy = await getUserIdByUsername(username);
+
+    // Proceed with creating the notice
     const newNotice = new Notice({
       title,
       description,
-      image,
-      video,
       category: category || "all",
       branch: branch || "all",
       createdBy,
     });
 
     await newNotice.save();
+
+    // Send email notifications
+    await sendEmailNotification(newNotice); // Notify users about the new notice
+
     res.status(201).json({
       success: true,
       message: "Notice created successfully!",
@@ -414,11 +422,33 @@ app.post("/api/admin/post", verifyToken, isAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error("Error creating notice:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to create notice." });
+    res.status(500).json({
+      success: false,
+      message: `Failed to create notice. Error: ${err.message}`,
+    });
   }
 });
+// Function to send email notifications to relevant users (Your existing function)
+const sendEmailNotification = async (notice) => {
+  try {
+    // Fetch users who should be notified based on the notice's branch or category
+    const usersToNotify = await User.find({
+      $or: [{ branch: notice.branch }, { category: notice.category }],
+    });
+
+    // Send an email to each user
+    for (let user of usersToNotify) {
+      // Send an email with the notice details
+      const emailSubject = `New Notice: ${notice.title}`;
+      const emailText = `Hello ${user.username},\n\nA new notice has been posted:\n\nTitle: ${notice.title}\nDescription: ${notice.description}\n\nKind regards,\nYour Admin`;
+
+      // Use the sendEmail function from emailSender.js
+      await sendEmail(user.email, emailSubject, emailText);
+    }
+  } catch (err) {
+    console.error("Error sending email notifications:", err);
+  }
+};
 
 // Start Server
 app.listen(port, () => {
