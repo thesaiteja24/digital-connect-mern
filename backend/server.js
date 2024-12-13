@@ -90,10 +90,30 @@ const isAdmin = (req, res, next) => {
   });
 };
 
+const isStudent = (req, res, next) => {
+  if (req.isAuthenticated() && req.user.role === "student") {
+    return next();
+  }
+  return res.status(403).json({
+    success: false,
+    message: "Access denied. Students only.",
+  });
+};
+
+const isFaculty = (req, res, next) => {
+  if (req.isAuthenticated() && req.user.role === "faculty") {
+    return next();
+  }
+  return res.status(403).json({
+    success: false,
+    message: "Access denied. Faculty only.",
+  });
+};
+
 // Authentication Routes
 app.post("/api/register", async (req, res) => {
   try {
-    const { username, email, phone, password, role } = req.body;
+    const { username, email, phone, password, role, branch } = req.body;
     
     // Check for existing username and email
     const existingUsername = await User.findOne({ username });
@@ -107,7 +127,7 @@ app.post("/api/register", async (req, res) => {
     }
     
     // Create and register user
-    const user = new User({ username, email, phone, role });
+    const user = new User({ username, email, phone, role, branch });
     await User.register(user, password);
     
     res.status(201).json({
@@ -159,73 +179,60 @@ app.post("/api/login", (req, res, next) => {
           username: user.username,
           email: user.email,
           role: user.role,
+          branch: user.branch,
         },
       });
     });
   })(req, res, next);
 });
 
-app.post("/api/admin/login", (req, res, next) => {
-  passport.authenticate("user-local", (err, user, info) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Authentication error",
-      });
-    }
-    if (!user || user.role !== "admin") {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid admin credentials",
-      });
-    }
-    req.login(user, (err) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "Login failed",
-        });
-      }
-      res.json({
-        success: true,
-        message: "Admin login successful!",
-        admin: {
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        },
-      });
-    });
-  })(req, res, next);
-});
-
-app.post("/api/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Logout failed",
-      });
-    }
+// Student Routes
+app.get("/api/student/:branch/notices", isStudent, async (req, res) => {
+  try {
+    const { branch } = req.params;
+    const notices = await Notice.find({
+      $or: [
+        { branch: "all" },
+        { branch: branch },
+        { category: "all" }
+      ]
+    }).populate("createdBy", "username email");
+    
     res.json({
       success: true,
-      message: "Logout successful!",
+      notices,
     });
-  });
+  } catch (err) {
+    console.error("Error fetching student notices:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch notices.",
+    });
+  }
 });
 
-app.get("/api/check-auth", (req, res) => {
-  if (req.isAuthenticated()) {
+// Faculty Routes
+app.get("/api/faculty/:branch/notices", isFaculty, async (req, res) => {
+  try {
+    const { branch } = req.params;
+    const notices = await Notice.find({
+      $or: [
+        { branch: "all" },
+        { branch: branch },
+        { category: "all" }
+      ]
+    }).populate("createdBy", "username email");
+    
     res.json({
-      authenticated: true,
-      user: {
-        username: req.user.username,
-        email: req.user.email,
-        role: req.user.role,
-      },
+      success: true,
+      notices,
     });
-  } else {
-    res.json({ authenticated: false });
+  } catch (err) {
+    console.error("Error fetching faculty notices:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch notices.",
+    });
   }
 });
 
@@ -233,7 +240,10 @@ app.get("/api/check-auth", (req, res) => {
 // Public Routes
 app.get("/api/notices", async (req, res) => {
   try {
-    const notices = await Notice.find().populate("createdBy", "username email");
+    const notices = await Notice.find({
+      category: "all",
+      branch: "all"
+    }).populate("createdBy", "username email");
     res.json({ success: true, notices });
   } catch (err) {
     console.error("Error fetching notices:", err);
@@ -268,8 +278,8 @@ app.post("/api/admin/post", isAdmin, async (req, res) => {
       description,
       image,
       video,
-      category,
-      branch,
+      category: category || "all",
+      branch: branch || "all",
       createdBy,
     });
 
@@ -295,8 +305,8 @@ app.put("/api/admin/post/:id", isAdmin, async (req, res) => {
         description,
         image,
         video,
-        category,
-        branch,
+        category: category || "all",
+        branch: branch || "all",
         updatedAt: Date.now(),
       },
       { new: true }
