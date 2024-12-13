@@ -8,23 +8,22 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
-const LocalStrategy = require("passport-local");
+const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user_model");
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 // Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: "http://localhost:3000", // Adjust to your client app's URL
+    origin: "http://localhost:3000", // Adjust to your frontend URL
     credentials: true,
   })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Session configuration
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "thisshouldbeasecret",
@@ -39,42 +38,61 @@ app.use(
   })
 );
 
-// Initialize Passport and manage sessions
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
+
+// Passport Configuration
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    User.authenticate()
+  )
+);
+
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // MongoDB connection
-const dbUrl = process.env.ATLAS_DB_URI;
 mongoose
-  .connect(dbUrl)
+  .connect(process.env.ATLAS_DB_URI)
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.error("Failed to connect to DB:", err));
 
 // Routes
-app.get("/api/", (req, res) => {
-  res.send("Hello World!");
-});
 
 // Register route
 app.post("/api/register", async (req, res) => {
-  const { username, email, phone, password } = req.body;
-
   try {
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
+    const { username, email, phone, password, role } = req.body;
+
+    // Check for existing username and email
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
       return res.status(400).json({ message: "Username already taken" });
     }
 
-    const user = new User({ username, email, phone });
-    await User.register(user, password); // Hashes password and saves user
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
 
-    res.status(201).json({ message: "Registration successful!" });
+    // Create and register user
+    const user = new User({ username, email, phone, role });
+    await User.register(user, password);
+
+    res.status(201).json({
+      success: true,
+      message: "Registration successful!",
+    });
   } catch (err) {
-    console.error("Error during registration:", err.message);
-    res.status(500).json({ message: "Registration failed" });
+    console.error("Registration error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Registration failed: " + err.message,
+    });
   }
 });
 
@@ -82,24 +100,40 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) {
-      return res.status(500).json({ message: "Authentication error" });
+      return res.status(500).json({
+        success: false,
+        message: "Authentication error",
+      });
     }
+
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: info?.message || "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        message: info?.message || "Invalid credentials",
+      });
     }
 
     req.login(user, (err) => {
       if (err) {
-        return res.status(500).json({ message: "Login failed" });
+        return res.status(500).json({
+          success: false,
+          message: "Login failed",
+        });
       }
 
-      return res.json({
+      const welcomeMessage =
+        user.role === "student"
+          ? "Welcome student! Access granted to student portal."
+          : "Welcome professor! Access granted to faculty dashboard.";
+
+      res.json({
+        success: true,
         message: "Login successful!",
+        welcomeMessage,
         user: {
           username: user.username,
           email: user.email,
+          role: user.role,
         },
       });
     });
@@ -110,16 +144,29 @@ app.post("/api/login", (req, res, next) => {
 app.post("/api/logout", (req, res) => {
   req.logout((err) => {
     if (err) {
-      return res.status(500).json({ message: "Logout failed" });
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed",
+      });
     }
-    res.json({ message: "Logout successful!" });
+    res.json({
+      success: true,
+      message: "Logout successful!",
+    });
   });
 });
 
 // Check if user is authenticated
-app.get("/check-auth", (req, res) => {
+app.get("/api/check-auth", (req, res) => {
   if (req.isAuthenticated()) {
-    res.json({ authenticated: true, user: req.user });
+    res.json({
+      authenticated: true,
+      user: {
+        username: req.user.username,
+        email: req.user.email,
+        role: req.user.role,
+      },
+    });
   } else {
     res.json({ authenticated: false });
   }
