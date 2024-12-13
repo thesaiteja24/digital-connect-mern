@@ -6,11 +6,6 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user_model");
-const Notice = require("./models/notice_model");
-
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -63,11 +58,14 @@ mongoose
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.error("Failed to connect to DB:", err));
 
-// User Routes
+// Routes
+
+// User Register route
 app.post("/api/register", async (req, res) => {
   try {
     const { username, email, phone, password, role } = req.body;
 
+    // Check for existing username and email
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
       return res.status(400).json({ message: "Username already taken" });
@@ -78,42 +76,46 @@ app.post("/api/register", async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
+    // Create and register user
     const user = new User({ username, email, phone, role });
     await User.register(user, password);
 
-    res
-      .status(201)
-      .json({ success: true, message: "Registration successful!" });
+    res.status(201).json({
+      success: true,
+      message: "Registration successful!",
+    });
   } catch (err) {
     console.error("Registration error:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Registration failed: " + err.message });
+    res.status(500).json({
+      success: false,
+      message: "Registration failed: " + err.message,
+    });
   }
 });
 
+// User Login route
 app.post("/api/login", (req, res, next) => {
   passport.authenticate("user-local", (err, user, info) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Authentication error" });
+      return res.status(500).json({
+        success: false,
+        message: "Authentication error",
+      });
     }
 
     if (!user) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: info?.message || "Invalid credentials",
-        });
+      return res.status(401).json({
+        success: false,
+        message: info?.message || "Invalid credentials",
+      });
     }
 
     req.login(user, (err) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Login failed" });
+        return res.status(500).json({
+          success: false,
+          message: "Login failed",
+        });
       }
 
       const welcomeMessage =
@@ -137,66 +139,29 @@ app.post("/api/login", (req, res, next) => {
   })(req, res, next);
 });
 
-app.post("/api/admin/register", async (req, res) => {
-  try {
-    const { username, email, phone, password } = req.body;
-
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: "Username already taken" });
-    }
-
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-
-    const admin = new User({ username, email, phone, role: "admin" });
-    await User.register(admin, password);
-
-    res
-      .status(201)
-      .json({ success: true, message: "Admin registration successful!" });
-  } catch (err) {
-    console.error("Admin Registration error:", err);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Admin registration failed: " + err.message,
-      });
-  }
-});
-
+// Admin Login route (using same model but checking role)
 app.post("/api/admin/login", (req, res, next) => {
   passport.authenticate("user-local", (err, user, info) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Authentication error" });
+      return res.status(500).json({
+        success: false,
+        message: "Authentication error",
+      });
     }
 
-    if (!user) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: info?.message || "Invalid credentials",
-        });
-    }
-
-    // Check if the user is an admin
-    if (user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ success: false, message: "Access denied. Admin only." });
+    if (!user || user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid admin credentials",
+      });
     }
 
     req.login(user, (err) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Login failed" });
+        return res.status(500).json({
+          success: false,
+          message: "Login failed",
+        });
       }
 
       res.json({
@@ -212,15 +177,56 @@ app.post("/api/admin/login", (req, res, next) => {
   })(req, res, next);
 });
 
+// Admin Register route (using User model)
+app.post("/api/admin/register", async (req, res) => {
+  try {
+    const { username, email, phone, password } = req.body;
+
+    // Check for existing username and email
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username already taken" });
+    }
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    // Create and register admin
+    const admin = new User({ username, email, phone, role: "admin" });
+    await User.register(admin, password);
+
+    res.status(201).json({
+      success: true,
+      message: "Admin registration successful!",
+    });
+  } catch (err) {
+    console.error("Admin Registration error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Admin registration failed: " + err.message,
+    });
+  }
+});
+
+// Logout route
 app.post("/api/logout", (req, res) => {
   req.logout((err) => {
     if (err) {
-      return res.status(500).json({ success: false, message: "Logout failed" });
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed",
+      });
     }
-    res.json({ success: true, message: "Logout successful!" });
+    res.json({
+      success: true,
+      message: "Logout successful!",
+    });
   });
 });
 
+// Check if user is authenticated
 app.get("/api/check-auth", (req, res) => {
   if (req.isAuthenticated()) {
     res.json({
@@ -236,16 +242,17 @@ app.get("/api/check-auth", (req, res) => {
   }
 });
 
+// Example Admin-only route
 function isAdmin(req, res, next) {
   if (req.isAuthenticated() && req.user.role === "admin") {
     return next();
   }
-  return res
-    .status(403)
-    .json({ success: false, message: "Access denied. Admin only." });
+  return res.status(403).json({
+    success: false,
+    message: "Access denied. Admin only.",
+  });
 }
 
-// Admin-only route
 app.get("/api/admin/dashboard", isAdmin, (req, res) => {
   res.json({
     success: true,
