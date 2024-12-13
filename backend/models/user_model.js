@@ -5,16 +5,17 @@ const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true }, // Added username field
   email: { type: String, unique: true, required: true },
   phone: { type: Number, required: true },
-  role: { 
-    type: String, 
+  role: {
+    type: String,
     required: true,
-    enum: ['student', 'faculty', 'admin'],
-    default: 'student'
-  }
+    enum: ["student", "faculty", "admin"],
+    default: "student",
+  },
+  branch: { type: String, required: true },
 });
 
-userSchema.plugin(passportLocalMongoose, { 
-  usernameField: 'email'
+userSchema.plugin(passportLocalMongoose, {
+  usernameField: "email",
 });
 
 module.exports = mongoose.model("User", userSchema);

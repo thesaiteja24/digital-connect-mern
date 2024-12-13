@@ -114,22 +114,22 @@ const isFaculty = (req, res, next) => {
 app.post("/api/register", async (req, res) => {
   try {
     const { username, email, phone, password, role, branch } = req.body;
-    
+
     // Check for existing username and email
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
       return res.status(400).json({ message: "Username already taken" });
     }
-    
+
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
       return res.status(400).json({ message: "Email already registered" });
     }
-    
+
     // Create and register user
     const user = new User({ username, email, phone, role, branch });
     await User.register(user, password);
-    
+
     res.status(201).json({
       success: true,
       message: "Registration successful!",
@@ -170,7 +170,7 @@ app.post("/api/login", (req, res, next) => {
           : user.role === "faculty"
           ? "Welcome professor! Access granted to faculty dashboard."
           : "Welcome admin! Access granted to admin dashboard.";
-      
+
       res.json({
         success: true,
         message: "Login successful!",
@@ -191,13 +191,9 @@ app.get("/api/student/:branch/notices", isStudent, async (req, res) => {
   try {
     const { branch } = req.params;
     const notices = await Notice.find({
-      $or: [
-        { branch: "all" },
-        { branch: branch },
-        { category: "all" }
-      ]
+      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
     }).populate("createdBy", "username email");
-    
+
     res.json({
       success: true,
       notices,
@@ -216,13 +212,9 @@ app.get("/api/faculty/:branch/notices", isFaculty, async (req, res) => {
   try {
     const { branch } = req.params;
     const notices = await Notice.find({
-      $or: [
-        { branch: "all" },
-        { branch: branch },
-        { category: "all" }
-      ]
+      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
     }).populate("createdBy", "username email");
-    
+
     res.json({
       success: true,
       notices,
@@ -242,12 +234,14 @@ app.get("/api/notices", async (req, res) => {
   try {
     const notices = await Notice.find({
       category: "all",
-      branch: "all"
+      branch: "all",
     }).populate("createdBy", "username email");
     res.json({ success: true, notices });
   } catch (err) {
     console.error("Error fetching notices:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch notices." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch notices." });
   }
 });
 
@@ -258,21 +252,96 @@ app.get("/api/notices/:id", async (req, res) => {
       "username email"
     );
     if (!notice) {
-      return res.status(404).json({ success: false, message: "Notice not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Notice not found." });
     }
     res.json({ success: true, notice });
   } catch (err) {
     console.error("Error fetching notice:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch notice." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch notice." });
   }
 });
 
 // Admin Routes
+// Admin Registration API
+app.post("/api/admin/register", async (req, res) => {
+  try {
+    const { username, email, phone, password, branch } = req.body;
+
+    // Check if the email is already registered
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    // Create and register admin user
+    const admin = new User({
+      username,
+      email,
+      phone,
+      role: "admin", // Set role to 'admin'
+      branch,
+    });
+
+    await User.register(admin, password);
+
+    res.status(201).json({
+      success: true,
+      message: "Admin registration successful!",
+    });
+  } catch (err) {
+    console.error("Admin registration error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Admin registration failed: " + err.message,
+    });
+  }
+});
+
+// Admin Login API
+app.post("/api/admin/login", (req, res, next) => {
+  passport.authenticate("user-local", (err, user, info) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Authentication error",
+      });
+    }
+    if (!user || user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: info?.message || "Invalid credentials or not an admin",
+      });
+    }
+    req.login(user, (err) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Login failed",
+        });
+      }
+      res.json({
+        success: true,
+        message: "Admin login successful!",
+        admin: {
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          branch: user.branch,
+        },
+      });
+    });
+  })(req, res, next);
+});
+
 app.post("/api/admin/post", isAdmin, async (req, res) => {
   try {
     const { title, description, image, video, category, branch } = req.body;
     const createdBy = req.user._id;
-    
+
     const newNotice = new Notice({
       title,
       description,
@@ -291,7 +360,9 @@ app.post("/api/admin/post", isAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error("Error creating notice:", err);
-    res.status(500).json({ success: false, message: "Failed to create notice." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to create notice." });
   }
 });
 
@@ -311,11 +382,13 @@ app.put("/api/admin/post/:id", isAdmin, async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!updatedNotice) {
-      return res.status(404).json({ success: false, message: "Notice not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Notice not found." });
     }
-    
+
     res.json({
       success: true,
       message: "Notice updated successfully!",
@@ -323,7 +396,9 @@ app.put("/api/admin/post/:id", isAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error("Error updating notice:", err);
-    res.status(500).json({ success: false, message: "Failed to update notice." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update notice." });
   }
 });
 
@@ -331,12 +406,16 @@ app.delete("/api/admin/post/:id", isAdmin, async (req, res) => {
   try {
     const deletedNotice = await Notice.findByIdAndDelete(req.params.id);
     if (!deletedNotice) {
-      return res.status(404).json({ success: false, message: "Notice not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Notice not found." });
     }
     res.json({ success: true, message: "Notice deleted successfully!" });
   } catch (err) {
     console.error("Error deleting notice:", err);
-    res.status(500).json({ success: false, message: "Failed to delete notice." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to delete notice." });
   }
 });
 
@@ -349,6 +428,41 @@ app.get("/api/admin/dashboard", isAdmin, (req, res) => {
       email: req.user.email,
     },
   });
+});
+
+// ------- Danger ---------
+// Clear all documents in the User collection
+app.delete("/api/clear/users", isAdmin, async (req, res) => {
+  try {
+    await User.deleteMany({});
+    res.json({
+      success: true,
+      message: "All users cleared successfully",
+    });
+  } catch (err) {
+    console.error("Error clearing users:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear users",
+    });
+  }
+});
+
+// Clear all documents in the Notice collection
+app.delete("/api/clear/notices", isAdmin, async (req, res) => {
+  try {
+    await Notice.deleteMany({});
+    res.json({
+      success: true,
+      message: "All notices cleared successfully",
+    });
+  } catch (err) {
+    console.error("Error clearing notices:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear notices",
+    });
+  }
 });
 
 // Server Startup
