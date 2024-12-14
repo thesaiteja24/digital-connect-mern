@@ -555,6 +555,10 @@ const sendEmailNotification = async (notice) => {
   }
 };
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 app.get("/api/test/upload-image", async (req, res) => {
   try {
     // Path to the image file you want to upload
