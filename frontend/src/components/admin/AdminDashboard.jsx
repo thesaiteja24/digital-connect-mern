@@ -111,6 +111,16 @@ const AdminDashboard = () => {
           </ul>
         </div>
       </main>
+      {/* Chat Bot Button */}
+      <div className="fixed bottom-10 right-4 z-50">
+        <Link
+          target="_blank"
+          to="/chatbot"
+          className="bg-blue-500 text-white p-6 rounded-full shadow-lg hover:bg-blue-600 transition"
+        >
+          <span className="text-3xl">💬</span>
+        </Link>
+      </div>
     </div>
   );
 };

@@ -5,15 +5,14 @@ import StudentAvatar from "./assets/DALL·E 2024-12-13 21.58.59 - A cartoon-styl
 import FacultyAvatar from "./assets/Untitled design (1).png";
 import AdminAvatar from "./assets/Untitled design (2).png";
 
-
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-scree" style={{ backgroundColor: "#E9F1FA" }}>
       {/* Navbar */}
-      <nav className="bg-blue-500 p-4 shadow-md">
+      <nav className="p-4 shadow-md" style={{ backgroundColor: "#37AFE1" }}      >
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-white text-2xl font-bold">Digital Connect</h1>
-          <div className="space-x-4">
+          <div className="space-x-10">
             <Link
               to="/landinglogin"
               className="text-white font-medium hover:text-blue-300"
@@ -31,19 +30,21 @@ export default function LandingPage() {
       </nav>
 
       {/* Section 1: Content and Image */}
-      <div className="flex flex-col md:flex-row items-center justify-between p-8 bg-white">
+      <div className="flex flex-col md:flex-row items-center justify-between p-8" style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}>
         <div className="md:w-1/2 text-center md:text-left">
-          <h2 className="text-3xl font-bold mb-4">Welcome to the Digital Connect</h2>
+          <h2 className="text-4xl font-bold mb-4">Welcome to the Digital Connect</h2>
+          <h3 className="text-xl font-bold mb-4">A Smart Notification System for Instant Updates</h3>
           <p className="text-gray-700 mb-4">
-            Access everything you need, whether you're a student, lecturer, or
-            admin. Stay connected, informed, and up-to-date.
+          An advanced communication platform designed to modernize how notices and updates are shared within institutions. It allows administrators to post categorized notifications, ensuring the right information reaches the appropriate audience.
           </p>
           <Link
             to="/landingregister"
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 text-white rounded hover:bg-blue-600"
+            style={{ backgroundColor: "#00ABE4" }}
           >
             Get Started
           </Link>
+
         </div>
         <div className="md:w-1/2 mt-8 md:mt-0">
           <img
@@ -61,23 +62,24 @@ export default function LandingPage() {
           {[
             {
               title: "Student",
-              description: "Access classes, assignments, and resources for your academic journey.",
-              img:  StudentAvatar ,
+              description: "Stay updated with personalized notices and alerts! Access department-specific announcements, event schedules, and exam updates directly from the Digital Notice Board.",
+              img: StudentAvatar,
             },
             {
               title: "Lecturer",
-              description: "Manage courses, post materials, and communicate with students.",
+              description: "Effortlessly manage and share updates! Post announcements, schedule notices, and keep students informed through the Digital Notice Board.",
               img: FacultyAvatar,
             },
             {
               title: "Admin",
-              description: "Handle user accounts, announcements, and institutional data.",
+              description: "Oversee and organize efficiently! Manage users, monitor engagement, and ensure seamless communication with the Digital Notice Board.",
               img: AdminAvatar,
             },
           ].map((card, index) => (
             <div
               key={index}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+              className=" p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+              style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}
             >
               <img
                 src={card.img}
@@ -92,7 +94,7 @@ export default function LandingPage() {
       </div>
 
       {/* Section 3: Notice Board */}
-      <div className="p-8 bg-white">
+      <div className="p-8" style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}>
         <h2 className="text-center text-2xl font-bold mb-4">Notice Board</h2>
         <ul className="space-y-4 text-gray-700">
           {[
@@ -100,7 +102,7 @@ export default function LandingPage() {
             "Campus will remain closed on national holidays.",
             "New library resources have been added.",
           ].map((notice, index) => (
-            <li key={index} className="p-4 bg-gray-100 rounded shadow">
+            <li key={index} className="p-4 bg-white rounded shadow">
               {notice}
             </li>
           ))}
@@ -125,7 +127,8 @@ export default function LandingPage() {
           ].map((event, index) => (
             <div
               key={index}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+              className=" p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+              style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}
             >
               <h3 className="text-xl font-bold mb-2">{event.title}</h3>
               <p className="text-gray-500 text-sm mb-4">{event.date}</p>
@@ -134,7 +137,18 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
+
+      {/* Chat Bot Button */}
+      <div className="fixed bottom-10 right-4 z-50">
+        <Link
+          target="_blank"
+          to="/chatbot"
+          className="bg-blue-500 text-white p-6 rounded-full shadow-lg hover:bg-blue-600 transition"
+        >
+          <span className="text-3xl">💬</span>
+        </Link>
+      </div>
+
     </div>
   );
 }
-

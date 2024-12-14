@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import FlashMessage from '../FlashMessage'; // Assuming a reusable FlashMessage component
+import Facultylr from "../../assets/Leonardo_Phoenix_A_modern_sleek_digital_notice_board_set_again_0.jpg";
 
 export default function RegisterFaculty() {
   const navigate = useNavigate();
@@ -46,10 +47,10 @@ export default function RegisterFaculty() {
 
       if (msg === "Registration successful!") {
         showFlashMessage(msg, "success");
-        navigate(`/faculty/dashboard/${msg}`, { state: res });
       } else {
         showFlashMessage(msg, "error");
       }
+      navigate(`/faculty/login`);
     } catch (error) {
       showFlashMessage("An error occurred during registration.", "error");
     }
@@ -60,7 +61,7 @@ export default function RegisterFaculty() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}>
       {/* Flash Message */}
       {flash.show && (
         <FlashMessage
@@ -71,7 +72,7 @@ export default function RegisterFaculty() {
       )}
 
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-6 md:p-8">
-        <div className="flex flex-col md:flex-row">
+        <div className="flex flex-col md:flex-row justify-content">
           {/* Left Column */}
           <div className="flex flex-col justify-center w-full md:w-1/2 order-2 md:order-1 px-6 md:px-12">
             <h1 className="text-center text-3xl font-bold mb-6">Register</h1>
@@ -81,7 +82,7 @@ export default function RegisterFaculty() {
               <input
                 type="text"
                 placeholder="Enter your name"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setUsername(e.target.value)}
               />
 
@@ -89,7 +90,7 @@ export default function RegisterFaculty() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setEmail(e.target.value)}
               />
 
@@ -97,7 +98,7 @@ export default function RegisterFaculty() {
               <input
                 type="text"
                 placeholder="Phone number"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setPhone(e.target.value)}
               />
 
@@ -105,7 +106,7 @@ export default function RegisterFaculty() {
               <input
                 type="password"
                 placeholder="Enter your password"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setPassword(e.target.value)}
               />
 
@@ -114,7 +115,7 @@ export default function RegisterFaculty() {
                 id="branch"
                 value={selectedBranch}
                 onChange={handleBranchChange}
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               >
                 <option value="" disabled>
                   Select your branch
@@ -126,12 +127,15 @@ export default function RegisterFaculty() {
             </div>
 
             {/* Register Button */}
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full mt-6"
-              onClick={handleRegister}
-            >
-              Register
-            </button>
+            <div className="flex justify-center items-center">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-1/2 mt-6"
+                onClick={handleRegister}
+              >
+                Register
+              </button>
+            </div>
+
 
             {/* Login Link */}
             <Link
@@ -145,9 +149,9 @@ export default function RegisterFaculty() {
           {/* Right Column */}
           <div className="flex items-center justify-center w-full md:w-1/2 order-1 md:order-2 mb-6 md:mb-0">
             <img
-              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp"
+              src={Facultylr}
               alt="Registration"
-              className="rounded-2xl w-full"
+              className="rounded-2xl w-full hidden sm:block"
             />
           </div>
         </div>

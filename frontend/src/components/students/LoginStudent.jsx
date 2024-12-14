@@ -66,7 +66,7 @@ export default function LoginStudent() {
   }, [message]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}>
       {/* Flash Message */}
       {flash.show && (
         <FlashMessage
@@ -86,30 +86,33 @@ export default function LoginStudent() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setEmail(e.target.value)}
               />
               {/* Password Input */}
               <input
                 type="password"
                 placeholder="Enter your password"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
             {/* Login Button */}
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full mt-6"
-              onClick={handleLogin}
-            >
-              Login
-            </button>
+            <div className="flex justify-center items-center">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-1/2 mt-6"
+                onClick={handleLogin}
+              >
+                Login
+              </button>
+            </div>
 
             {/* Register Link */}
             <Link
               to="/student/register"
               className="mt-4 text-blue-500 hover:text-blue-600 text-center block"
+              
             >
               Don't have an account? Register
             </Link>

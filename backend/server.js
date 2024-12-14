@@ -488,15 +488,13 @@ app.delete(
 // Get Student Notices
 app.get(
   "/api/student/:branch/notices",
-  verifyToken,
-  isStudent,
   async (req, res) => {
     try {
       const { branch } = req.params;
+      console.log(branch)
       const notices = await Notice.find({
         $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-      }).populate("createdBy", "username email");
-
+      });
       res.json({
         success: true,
         notices,
@@ -514,14 +512,12 @@ app.get(
 // Get Faculty Notices
 app.get(
   "/api/faculty/:branch/notices",
-  verifyToken,
-  isFaculty,
   async (req, res) => {
     try {
       const { branch } = req.params;
       const notices = await Notice.find({
         $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-      }).populate("createdBy", "username email");
+      });
 
       res.json({
         success: true,

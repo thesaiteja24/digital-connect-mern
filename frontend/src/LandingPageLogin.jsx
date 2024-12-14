@@ -2,16 +2,15 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const LandingPageLogin = () => {
-
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-gray-50">
+    <div className="min-h-screen flex flex-col justify-between" style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}>
       
       {/* Main Content */}
       <main className="flex flex-col lg:flex-row max-w-7xl mx-auto py-16 px-4 lg:space-x-16">
         {/* Left Section */}
-        <section className="flex-1 bg-light-blue p-8 border-r border-gray-300">
+        <section className="flex-1 bg-white p-8 border-b lg:border-r lg:border-b-0 lg:border-gray-300">
           <h2 className="text-2xl font-semibold text-bright-blue">For Faculty</h2>
           <p className="mt-4 text-gray-700">
             We are the market-leading technical interview platform to identify and hire developers with the right skills.
@@ -25,7 +24,7 @@ const LandingPageLogin = () => {
         </section>
 
         {/* Right Section */}
-        <section className="flex-1 bg-white p-8">
+        <section className="flex-1 bg-white p-8 border-t lg:border-t-0 lg:border-l lg:border-gray-300">
           <h2 className="text-2xl font-semibold text-bright-blue">For Student</h2>
           <p className="mt-4 text-gray-700">
             Join over 21 million developers, practice coding skills, prepare for interviews, and get hired.
@@ -40,7 +39,7 @@ const LandingPageLogin = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 py-4">
+      <footer className="py-4" style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}>
         <div className="max-w-7xl mx-auto text-center text-gray-600 text-sm">
           We use cookies to ensure you have the best browsing experience on our website. Read our <a href="#" className="text-bright-blue hover:underline">cookie policy</a> for more information.
         </div>

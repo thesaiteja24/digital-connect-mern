@@ -16,6 +16,8 @@ import FacultyNotificationDetails from "./components/faculty/FacultyNotification
 import AdminDashboard from "./components/admin/AdminDashboard";
 import NoticeForm from "./components/admin/NoticeForm.jsx"; 
 
+import ChatBot from "./components/ChatBot.jsx";
+
 import LandingPage from "./LandingPage.jsx";
 import LandingPageLogin from "./LandingPageLogin.jsx";
 import LandingPageRegister from './LandingPageRegister.jsx';
@@ -81,6 +83,10 @@ export default function App() {
     {
       path : "/admin/dashboard/notice",
       element : <NoticeForm />
+    },
+    {
+      path : "/chatbot",
+      element : <ChatBot />
     }
   ])
 

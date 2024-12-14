@@ -7,9 +7,7 @@ const FlashMessage = ({ message, type, show }) => {
 
   return (
     <div
-      className={`fixed top-4 right-4 z-50 p-4 rounded shadow-md text-white ${
-        type === "success" ? "bg-green-500" : "bg-red-500"
-      }`}
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-md  border-2 border-black`}
     >
       {message}
     </div>
@@ -26,37 +24,28 @@ const StudentDashboard = () => {
   const { msg } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const data = location.state;
   const notification = location.state || {};
 
   // Sample notifications data
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Exam Schedule Released",
-      message: "Check the exam timetable on the portal.",
-      image: "https://via.placeholder.com/150",
-      details:
-        "The exam schedule for all courses has been updated. Visit the Exams section for more details.",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Holiday Notice",
-      message: "Campus will remain closed on December 25th.",
-      image: "https://via.placeholder.com/150",
-      details: "This holiday is in observance of Christmas. Enjoy your break!",
-      read: true,
-    },
-    {
-      id: 3,
-      title: "Workshop on AI",
-      message: "Join the workshop on AI at 3 PM on Friday.",
-      image: "https://via.placeholder.com/150",
-      details:
-        "The AI workshop will cover recent advancements in machine learning. Venue: Room 305, CS Building.",
-      read: false,
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const temp = async () => {
+      let res = await fetch(`http://localhost:8080/api/student/${data.user.branch}/notices`, {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      res = await res.json();
+      setNotifications(res.notices);
+    }
+  
+    temp();  
+  }, []); 
+  
+
 
   useEffect(() => {
     if (msg) {
@@ -129,6 +118,7 @@ const StudentDashboard = () => {
             </h3>
             <p className="text-sm text-gray-600 mt-2">{notification.message}</p>
             <div className="flex justify-between items-center mt-4">
+              {let s = `/student/dashboard/notification/${notification.id}`}
               <Link
                 to="#"
                 onClick={() => viewNotification(notification)}
@@ -150,6 +140,16 @@ const StudentDashboard = () => {
             </div>
           </div>
         ))}
+      </div>
+      {/* Chat Bot Button */}
+      <div className="fixed bottom-10 right-4 z-50">
+        <Link
+          target="_blank"
+          to="/chatbot"
+          className="bg-blue-500 text-white p-6 rounded-full shadow-lg hover:bg-blue-600 transition"
+        >
+          <span className="text-3xl">💬</span>
+        </Link>
       </div>
     </div>
   );

@@ -58,13 +58,14 @@ export default function RegisterStudent() {
       } else {
         showFlashMessage(msg, "error");
       }
+      navigate(`/student/login`);
     } catch (error) {
       showFlashMessage("An error occurred while registering.", "error");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen " style={{ backgroundColor: 'rgb(75 141 216 / 29%)' }}>
       {/* Flash Message */}
       {flash.show && (
         <FlashMessage
@@ -85,7 +86,7 @@ export default function RegisterStudent() {
               <input
                 type="text"
                 placeholder="Enter your name"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setUsername(e.target.value)}
               />
 
@@ -93,7 +94,7 @@ export default function RegisterStudent() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setEmail(e.target.value)}
               />
 
@@ -101,7 +102,7 @@ export default function RegisterStudent() {
               <input
                 type="text"
                 placeholder="Enter your phone number"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setPhone(e.target.value)}
               />
 
@@ -109,7 +110,7 @@ export default function RegisterStudent() {
               <input
                 type="password"
                 placeholder="Enter your password"
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 onChange={(e) => setPassword(e.target.value)}
               />
 
@@ -118,7 +119,7 @@ export default function RegisterStudent() {
                 id="branch"
                 value={selectedBranch}
                 onChange={handleBranchChange}
-                className="w-full py-2 px-4 bg-white text-black border border-black rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full py-2 px-4 bg-white text-black border border-black rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               >
                 <option value="" disabled>
                   Select your branch
@@ -130,12 +131,15 @@ export default function RegisterStudent() {
             </div>
 
             {/* Register Button */}
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full mt-6"
-              onClick={handleRegister}
-            >
-              Register
-            </button>
+            <div className="flex justify-center items-center">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-1/2 mt-6"
+                onClick={handleRegister}
+              >
+                Register
+              </button>
+            </div>
+
 
             {/* Login Link */}
             <Link

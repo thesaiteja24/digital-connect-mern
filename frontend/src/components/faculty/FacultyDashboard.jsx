@@ -1,103 +1,96 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
+
+
+const FlashMessage = ({ message, type, show }) => {
+  if (!show) return null;
+
+  return (
+    <div
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-md  border-2 border-black`}
+    >
+      {message}
+    </div>
+  );
+};
 
 const FacultyDashboard = () => {
-  // Sample notifications data
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Exam Schedule Released",
-      message: "Check the exam timetable on the portal.",
-      image: "https://via.placeholder.com/150",
-      details: "The exam schedule for all courses has been updated. Visit the Exams section for more details.",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Holiday Notice",
-      message: "Campus will remain closed on December 25th.",
-      image: "https://via.placeholder.com/150",
-      details: "This holiday is in observance of Christmas. Enjoy your break!",
-      read: true,
-    },
-    {
-      id: 3,
-      title: "Workshop on AI",
-      message: "Join the workshop on AI at 3 PM on Friday.",
-      image: "https://via.placeholder.com/150",
-      details: "The AI workshop will cover recent advancements in machine learning. Venue: Room 305, CS Building.",
-      read: false,
-    },
-  ]);
-
-  const { msg } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const notification = location.state || {}; // Get the notification object
-
   const [flash, setFlash] = useState({
     message: "",
     type: "success",
     show: false,
   });
 
+  const { msg } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const data = location.state;
+  console.log(data);
+  const notification = location.state || {};
+
+  // Sample notifications data
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const temp = async () => {
+      let res = await fetch(`http://localhost:8080/api/faculty/${data.user.branch}/notices`, {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      res = await res.json();
+      setNotifications(res.notices);
+    }
+  
+    temp();  
+  }, []); 
+  
+
+
   useEffect(() => {
     if (msg) {
       setFlash({ message: msg, type: "success", show: true });
 
-      // Hide the flash message after 3 seconds
       setTimeout(() => {
         setFlash((prev) => ({ ...prev, show: false }));
       }, 3000);
     }
 
     if (notification.token) {
-      localStorage.setItem('token', notification.token);
+      localStorage.setItem("token", notification.token);
     }
-  }, [msg, notification]);
+  }, [msg]);
 
-  // Mark a notification as read
   const markAsRead = (id) => {
     setNotifications((prev) =>
       prev.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification
       )
     );
-    setFlash({ message: "Notification marked as read!", type: "success", show: true });
-    setTimeout(() => setFlash((prev) => ({ ...prev, show: false })), 3000); // Hide flash message after 3 seconds
   };
 
-  // Redirect to Notification Details page
   const viewNotification = (notification) => {
-    navigate(`/faculty/dashboard/notification/${notification.id}`, { state: notification });
+    navigate(`student/dashboard/notification/${notification.id}`, {
+      state: notification,
+    });
   };
 
-  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setFlash({ message: "Logged out successfully!", type: "success", show: true });
-    setTimeout(() => setFlash((prev) => ({ ...prev, show: false })), 3000); // Hide flash message after 3 seconds
+    localStorage.removeItem("token");
     navigate("/");
-  };
-
-  const FlashMessage = ({ message, type, show }) => {
-    if (!show) return null;
-
-    return (
-      <div
-        className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded shadow-md  border-2 border-black`}
-      >
-        {message}
-      </div>
-    );
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Flash Message */}
-      <FlashMessage message={flash.message} type={flash.type} show={flash.show} />
-      
+      <FlashMessage
+        message={flash.message}
+        type={flash.type}
+        show={flash.show}
+      />
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Faculty Dashboard</h1>
 
@@ -147,6 +140,16 @@ const FacultyDashboard = () => {
             </div>
           </div>
         ))}
+      </div>
+      {/* Chat Bot Button */}
+      <div className="fixed bottom-10 right-4 z-50">
+        <Link
+          target="_blank"
+          to="/chatbot"
+          className="bg-blue-500 text-white p-6 rounded-full shadow-lg hover:bg-blue-600 transition"
+        >
+          <span className="text-3xl">💬</span>
+        </Link>
       </div>
     </div>
   );
