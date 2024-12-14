@@ -61,7 +61,7 @@ const corsOptions = {
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true, // if you need to send cookies or auth headers
 };
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Session Configuration
 app.use(
