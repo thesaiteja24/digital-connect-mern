@@ -448,6 +448,31 @@ app.put("/api/admin/notice/:id", upload.single("image"), async (req, res) => {
   }
 });
 
+app.get("/api/admin/notices", async (req, res) => {
+  try {
+    const notices = await Notice.find(); // Fetch all notices from the database
+
+    if (!notices.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No notices found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Notices retrieved successfully",
+      notices,
+    });
+  } catch (err) {
+    console.error("Error fetching notices:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch notices",
+    });
+  }
+});
+
 app.delete(
   "/api/admin/notice/:id/image",
   verifyToken,
@@ -486,52 +511,46 @@ app.delete(
 );
 
 // Get Student Notices
-app.get(
-  "/api/student/:branch/notices",
-  async (req, res) => {
-    try {
-      const { branch } = req.params;
-      console.log(branch)
-      const notices = await Notice.find({
-        $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-      });
-      res.json({
-        success: true,
-        notices,
-      });
-    } catch (err) {
-      console.error("Error fetching student notices:", err);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch notices.",
-      });
-    }
+app.get("/api/student/:branch/notices", async (req, res) => {
+  try {
+    const { branch } = req.params;
+    console.log(branch);
+    const notices = await Notice.find({
+      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
+    });
+    res.json({
+      success: true,
+      notices,
+    });
+  } catch (err) {
+    console.error("Error fetching student notices:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch notices.",
+    });
   }
-);
+});
 
 // Get Faculty Notices
-app.get(
-  "/api/faculty/:branch/notices",
-  async (req, res) => {
-    try {
-      const { branch } = req.params;
-      const notices = await Notice.find({
-        $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-      });
+app.get("/api/faculty/:branch/notices", async (req, res) => {
+  try {
+    const { branch } = req.params;
+    const notices = await Notice.find({
+      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
+    });
 
-      res.json({
-        success: true,
-        notices,
-      });
-    } catch (err) {
-      console.error("Error fetching faculty notices:", err);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch notices.",
-      });
-    }
+    res.json({
+      success: true,
+      notices,
+    });
+  } catch (err) {
+    console.error("Error fetching faculty notices:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch notices.",
+    });
   }
-);
+});
 
 // Email Notification Function
 const sendEmailNotification = async (notice) => {
