@@ -3,49 +3,21 @@ const mongoose = require("mongoose");
 const noticeSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: [true, "Title is required"],
     trim: true,
   },
   description: {
     type: String,
-    required: true,
+    required: [true, "Description is required"],
     trim: true,
   },
   image: {
-    type: String, // URL of the image
+    type: String,
     trim: true,
   },
   video: {
-    type: String, // URL of the video
+    type: String,
     trim: true,
-  },
-  comments: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // Reference to the User model
-        required: true,
-      },
-      comment: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      timestamp: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
-  votes: {
-    upvotes: {
-      type: Number,
-      default: 0,
-    },
-    downvotes: {
-      type: Number,
-      default: 0,
-    },
   },
   category: {
     type: String,
@@ -55,12 +27,7 @@ const noticeSchema = new mongoose.Schema({
   },
   branch: {
     type: String,
-    enum: ["CSE", "CSM", "CSD"], // Add or modify branches as needed
-    required: true,
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Reference to the User model
+    enum: ["CSE", "CSM", "CSD"],
     required: true,
   },
   createdAt: {

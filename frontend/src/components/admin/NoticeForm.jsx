@@ -23,26 +23,29 @@ const NoticeForm = () => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("category", category);
-    formData.append("branch", branch.toUpperCase());
-    if (image) formData.append("image", image);
-    if (video) formData.append("video", video);
+    formData.append("branch", branch);
+    if (image) formData.append("imageOrVideo", image);
+    if (video) formData.append("imageOrVideo", video);
 
     try {
       const response = await fetch("http://localhost:8080/api/admin/post", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: formData,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Notice added successfully!");
-      } else {
-        alert(`Error: ${data.message || "Error adding notice"}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        const errorMessage =
+          errorData?.message ||
+          `HTTP Error: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
       }
+
+      const data = await response.json();
+      alert("Notice added successfully!");
     } catch (error) {
-      console.error("Error adding notice:", error);
-      alert("Error adding notice!");
+      console.error("Error adding notice:", error.message);
+      alert(`Error adding notice: ${error.message}`);
     }
   };
 
