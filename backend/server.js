@@ -56,12 +56,12 @@ const upload = multer({ storage: storage });
 // Middleware Configuration
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: "https://digital-connect.onrender.com",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // if you need to send cookies or auth headers
+};
+app.use(cors(corsOptions));
 
 // Session Configuration
 app.use(
@@ -550,6 +550,10 @@ const sendEmailNotification = async (notice) => {
     console.error("Error sending email notifications:", err);
   }
 };
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 app.get("/api/test/upload-image", async (req, res) => {
   try {
