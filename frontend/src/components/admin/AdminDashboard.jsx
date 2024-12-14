@@ -90,49 +90,6 @@ const AdminDashboard = () => {
         </div>
       </nav>
 
-      {/* <main className="p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Analytics</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-700">Total Views</h3>
-            <p className="text-3xl font-bold text-gray-900">
-              {analytics.viewCount}
-            </p>
-          </div>
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-700">Total Clicks</h3>
-            <p className="text-3xl font-bold text-gray-900">
-              {analytics.clickCount}
-            </p>
-          </div>
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-700">
-              Interaction Rate
-            </h3>
-            <p className="text-3xl font-bold text-gray-900">
-              {analytics.interactionRate}%
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white shadow rounded-lg p-6 mt-6">
-          <h3 className="text-lg font-medium text-gray-700 mb-4">
-            Engagement Trends
-          </h3>
-          <ul className="space-y-2">
-            {analytics.engagementTrends.map((trend, index) => (
-              <li key={index} className="flex justify-between">
-                <span className="text-gray-700">{trend.date}</span>
-                <span className="font-bold text-gray-900">
-                  {trend.engagement}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </main> */}
-
 <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {notifications.map((notification) => (
           <div

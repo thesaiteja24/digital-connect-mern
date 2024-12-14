@@ -511,7 +511,6 @@ app.delete(
 );
 
 // Get Student Notices
-<<<<<<< HEAD
 app.get(
   "/api/student/:branch/notices",
   async (req, res) => {
@@ -531,30 +530,10 @@ app.get(
         message: "Failed to fetch notices.",
       });
     }
-=======
-app.get("/api/student/:branch/notices", async (req, res) => {
-  try {
-    const { branch } = req.params;
-    console.log(branch);
-    const notices = await Notice.find({
-      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-    });
-    res.json({
-      success: true,
-      notices,
-    });
-  } catch (err) {
-    console.error("Error fetching student notices:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch notices.",
-    });
->>>>>>> d2217ba48338ab4a79102eee9537939bc43eeb48
   }
-});
+);
 
 // Get Faculty Notices
-<<<<<<< HEAD
 app.get(
   "/api/faculty/:branch/notices",
   async (req, res) => {
@@ -563,14 +542,6 @@ app.get(
       const notices = await Notice.find({
         $or: [ { branch: branch }, { category: "faculty" }],
       });
-=======
-app.get("/api/faculty/:branch/notices", async (req, res) => {
-  try {
-    const { branch } = req.params;
-    const notices = await Notice.find({
-      $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
-    });
->>>>>>> d2217ba48338ab4a79102eee9537939bc43eeb48
 
     res.json({
       success: true,
