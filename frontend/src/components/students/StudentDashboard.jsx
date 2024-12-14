@@ -118,7 +118,6 @@ const StudentDashboard = () => {
             </h3>
             <p className="text-sm text-gray-600 mt-2">{notification.message}</p>
             <div className="flex justify-between items-center mt-4">
-              {let s = `/student/dashboard/notification/${notification.id}`}
               <Link
                 to="#"
                 onClick={() => viewNotification(notification)}

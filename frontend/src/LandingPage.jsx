@@ -13,18 +13,12 @@ export default function LandingPage() {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-white text-2xl font-bold">Digital Connect</h1>
           <div className="space-x-10">
-            <Link
-              to="/landinglogin"
-              className="text-white font-medium hover:text-blue-300"
-            >
-              Login
-            </Link>
-            <Link
-              to="/landingregister"
-              className="text-white font-medium hover:text-blue-300"
-            >
-              Register
-            </Link>
+          <Link
+            to="/admin/login"
+            className="text-white font-medium hover:text-blue-300"
+          >
+            Admin Login
+          </Link>
           </div>
         </div>
       </nav>
@@ -37,13 +31,24 @@ export default function LandingPage() {
           <p className="text-gray-700 mb-4">
           An advanced communication platform designed to modernize how notices and updates are shared within institutions. It allows administrators to post categorized notifications, ensuring the right information reaches the appropriate audience.
           </p>
-          <Link
-            to="/landingregister"
-            className="px-4 py-2 text-white rounded hover:bg-blue-600"
+          <div className="space-x-10">
+            <Link
+              to="/landinglogin"
+              className="px-4 py-2 text-white rounded hover:bg-blue-600"
+              style={{ backgroundColor: "#00ABE4" }}
+            >
+              Login
+            </Link>
+            <Link
+              to="/landingregister"
+              className="px-4 py-2 text-white rounded hover:bg-blue-600"
             style={{ backgroundColor: "#00ABE4" }}
-          >
-            Get Started
-          </Link>
+            >
+              Register
+            </Link>
+          </div>
+
+          
 
         </div>
         <div className="md:w-1/2 mt-8 md:mt-0">

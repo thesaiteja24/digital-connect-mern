@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const NoticeForm = () => {
   const [title, setTitle] = useState("");
@@ -11,6 +12,8 @@ const NoticeForm = () => {
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
   };
+
+  const navigate = useNavigate();
 
   const handleVideoChange = (e) => {
     setVideo(e.target.files[0]);
@@ -44,8 +47,8 @@ const NoticeForm = () => {
           responseData?.message || `HTTP Error: ${response.status} ${response.statusText}`;
         throw new Error(errorMessage);
       }
-  
-      alert("Notice added successfully!");
+      
+      navigate("/admin/dashboard/succesfull")
     } catch (error) {
       console.error("Error adding notice:", error.message);
       alert(`Error adding notice: ${error.message}`);

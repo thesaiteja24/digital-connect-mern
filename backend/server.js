@@ -61,7 +61,7 @@ const corsOptions = {
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true, // if you need to send cookies or auth headers
 };
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Session Configuration
 app.use(
@@ -491,9 +491,8 @@ app.get(
   async (req, res) => {
     try {
       const { branch } = req.params;
-      console.log(branch)
       const notices = await Notice.find({
-        $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
+        $or: [{ branch: branch }, { category: "student" }],
       });
       res.json({
         success: true,
@@ -516,7 +515,7 @@ app.get(
     try {
       const { branch } = req.params;
       const notices = await Notice.find({
-        $or: [{ branch: "all" }, { branch: branch }, { category: "all" }],
+        $or: [ { branch: branch }, { category: "faculty" }],
       });
 
       res.json({
@@ -582,6 +581,57 @@ app.get("/api/test/upload-image", async (req, res) => {
     });
   }
 });
+
+app.get("/api/admin/notices", async (req, res) => {
+  try {
+    const notices = await Notice.find(); // Fetch all notices from the database
+
+    if (!notices.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No notices found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Notices retrieved successfully",
+      notices,
+    });
+  } catch (err) {
+    console.error("Error fetching notices:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch notices",
+    });
+  }
+});
+
+app.get("/api/admin/notice/:id", async (req, res) => {
+  try {
+    const notice = await Notice.findById(req.params.id); // Fetch the notice by ID
+
+    if (!notice) {
+      return res.status(404).json({
+        success: false,
+        message: "Notice not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Notice retrieved successfully",
+      notice,
+    });
+  } catch (err) {
+    console.error("Error fetching notice by ID:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch notice",
+    });
+  }
+});
+
 // Start Server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

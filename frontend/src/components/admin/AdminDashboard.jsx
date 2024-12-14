@@ -3,7 +3,12 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 
+
 const AdminDashboard = () => {
+
+  const [notifications, setNotifications] = useState([])
+  
+
   const [analytics, setAnalytics] = useState({
     viewCount: 0,
     clickCount: 0,
@@ -23,6 +28,22 @@ const AdminDashboard = () => {
       }
     };
     fetchAnalytics();
+  }, []);
+
+  useEffect(() => {
+    const temp = async () => {
+      let res = await fetch(`http://localhost:8080/api/admin/notices`, {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      res = await res.json();
+      setNotifications(res.notices);
+      console.log(res.notices)
+    }
+  
+    temp();  
   }, []);
 
   const { msg } = useParams();
@@ -69,7 +90,7 @@ const AdminDashboard = () => {
         </div>
       </nav>
 
-      <main className="p-6">
+      {/* <main className="p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Analytics</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -110,7 +131,47 @@ const AdminDashboard = () => {
             ))}
           </ul>
         </div>
-      </main>
+      </main> */}
+
+<div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
+          >
+            <img
+              src={notification.image}
+              alt={notification.title}
+              className="rounded-t-lg w-full h-40 object-cover mb-4"
+            />
+            <h3 className="text-lg font-semibold text-gray-800">
+              {notification.title}
+            </h3>
+            <p className="text-sm text-gray-600 mt-2">{notification.message}</p>
+            <div className="flex justify-between items-center mt-4">
+              <Link
+                to="#"
+                onClick={() => viewNotification(notification)}
+                className="text-green-500 hover:underline text-sm"
+              >
+                View
+              </Link>
+              {!notification.read ? (
+                <Link
+                  to="#"
+                  onClick={() => markAsRead(notification.id)}
+                  className="text-blue-500 hover:underline text-sm"
+                >
+                  Mark as Read
+                </Link>
+              ) : (
+                <span className="text-gray-400 text-sm">Read</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Chat Bot Button */}
       <div className="fixed bottom-10 right-4 z-50">
         <Link
