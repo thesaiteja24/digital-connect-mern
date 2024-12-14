@@ -37,10 +37,17 @@ cloudinary.config({
 // Configure multer and Cloudinary storage
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: "notices",
-    allowed_formats: ["jpg", "jpeg", "png", "gif"],
-    transformation: [{ width: 1000, height: 1000, crop: "limit" }],
+  params: (req, file) => {
+    const isImage = file.mimetype.startsWith("image");
+    const isVideo = file.mimetype.startsWith("video");
+
+    return {
+      folder: "notices",
+      allowed_formats: isImage ? ["jpg", "jpeg", "png", "gif"] : ["mp4", "avi"],
+      transformation: isImage
+        ? [{ width: 1000, height: 1000, crop: "limit" }]
+        : [],
+    };
   },
 });
 
@@ -358,15 +365,30 @@ app.post("/api/admin/login", (req, res, next) => {
 app.post("/api/admin/post", upload.single("imageOrVideo"), async (req, res) => {
   try {
     const { username, title, description, category, branch } = req.body;
-    const imageOrVideoUrl = req.file ? req.file.path : null;
+    let imageOrVideoUrl = null;
+
+    if (req.file) {
+      const fileType = req.file.mimetype.split("/")[0];
+      if (fileType === "image") {
+        imageOrVideoUrl = req.file.path;
+      } else if (fileType === "video") {
+        imageOrVideoUrl = req.file.path;
+      }
+    }
 
     const newNotice = new Notice({
       title,
       description,
       category: category || "all",
       branch: branch || "all",
-      image: imageOrVideoUrl && req.file.mimetype.startsWith("image") ? imageOrVideoUrl : null,
-      video: imageOrVideoUrl && req.file.mimetype.startsWith("video") ? imageOrVideoUrl : null,
+      image:
+        imageOrVideoUrl && req.file.mimetype.startsWith("image")
+          ? imageOrVideoUrl
+          : null,
+      video:
+        imageOrVideoUrl && req.file.mimetype.startsWith("video")
+          ? imageOrVideoUrl
+          : null,
     });
 
     await newNotice.save();
@@ -385,8 +407,6 @@ app.post("/api/admin/post", upload.single("imageOrVideo"), async (req, res) => {
     });
   }
 });
-
-
 
 app.put("/api/admin/notice/:id", upload.single("image"), async (req, res) => {
   try {

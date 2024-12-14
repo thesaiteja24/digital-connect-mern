@@ -18,7 +18,7 @@ const NoticeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -26,29 +26,32 @@ const NoticeForm = () => {
     formData.append("branch", branch);
     if (image) formData.append("imageOrVideo", image);
     if (video) formData.append("imageOrVideo", video);
-
+  
     try {
+      console.log("Sending request to create notice...");
       const response = await fetch("http://localhost:8080/api/admin/post", {
         method: "POST",
         body: formData,
       });
-
+  
+      // Log the response for debugging
+      console.log("Response Status:", response.status);
+      const responseData = await response.json();
+      console.log("Response Data:", responseData);
+  
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
         const errorMessage =
-          errorData?.message ||
-          `HTTP Error: ${response.status} ${response.statusText}`;
+          responseData?.message || `HTTP Error: ${response.status} ${response.statusText}`;
         throw new Error(errorMessage);
       }
-
-      const data = await response.json();
+  
       alert("Notice added successfully!");
     } catch (error) {
       console.error("Error adding notice:", error.message);
       alert(`Error adding notice: ${error.message}`);
     }
   };
-
+  
   return (
     <div className="max-w-2xl mx-auto p-4 border border-gray-300 rounded-lg">
       <h2 className="text-xl font-semibold mb-4">Create New Notice</h2>
