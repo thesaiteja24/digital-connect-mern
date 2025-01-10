@@ -1,3 +1,8 @@
+## **⚠️ Important Notice:**  
+Due to some issues, the frontend and backend connectivity is not integrated properly. I am working on it and will fix it soon.
+
+---
+
 # Digital Connect: A Smart Notification System
 
 **Digital Connect** is a cutting-edge notification platform designed to deliver instant updates to users in an efficient and streamlined manner. This platform is built collaboratively by Shanwaz, Saritha, Sai Teja, and Manideep as part of a hackathon project.
